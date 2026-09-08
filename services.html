@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Our Services — Sage X Limited</title>
+<meta name="description" content="Sage X Limited service brochure — full-lifecycle software development, and Meta &amp; TikTok ads campaign management with published rates.">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+
+<script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+
+<!-- Same theme contract as index.html: light default, [data-theme="dark"] flips it. -->
+<style>
+  :root{
+    --page-bg:#050705;
+    --page-fg:#39ff14;
+    --veil:5 7 5;
+    --plate:#070b07;
+  }
+  :root[data-theme="light"]{
+    --page-bg:#ffffff;
+    --page-fg:#000000;
+    --veil:255 255 255;
+    --plate:#f2f2f2;
+
+    --color-ink:#ffffff;
+    --color-ink-2:#f5f5f5;
+    --color-neon:#000000;
+    --color-chalk:#000000;
+    --color-paper:#000000;
+    --color-haze:#5a5a5a;
+    --color-plum:#ebebeb;
+    --color-hair:rgba(0,0,0,.18);
+  }
+
+  html{scroll-behavior:smooth}
+  body{margin:0;background:var(--page-bg);color:var(--page-fg)}
+
+  .plate{background:var(--plate)}
+  .shade{
+    position:absolute; inset:0; z-index:1;
+    background:linear-gradient(180deg,rgb(var(--veil)/.9) 0%,rgb(var(--veil)/.62) 45%,rgb(var(--veil)/.96) 100%);
+  }
+  /* cloud plates off in both themes, matching index.html — flip to `block` to restore */
+  .tex{position:absolute; inset:0; z-index:0; opacity:.34; display:none}
+  .tex svg{width:100%; height:100%; display:block}
+  /* light mode is plain paper — same contract as index.html */
+  :root[data-theme="light"] #grain,
+  :root[data-theme="light"] main svg:has(> rect[filter]){display:none}
+</style>
+
+<script>
+  (function () {
+    var m; try { m = localStorage.getItem('sagex-theme'); } catch (e) {}
+    document.documentElement.setAttribute('data-theme', m === 'dark' ? 'dark' : 'light');
+  })();
+</script>
+
+<style type="text/tailwindcss">
+  @theme {
+    --color-ink:    #050705;
+    --color-ink-2:  #0a0e0a;
+    --color-neon:   #39ff14;
+    --color-chalk:  #39ff14;
+    --color-haze:   #5f9152;
+    --color-paper:  #39ff14;
+    --color-plum:   #0d2b06;
+    --color-hair:   rgba(57,255,20,.16);
+
+    --font-display: "Anton","Oswald","Arial Narrow","Liberation Sans Narrow",Impact,sans-serif;
+    --font-body:    "Inter",ui-sans-serif,system-ui,sans-serif;
+
+    --spacing-pad:  clamp(18px, 3.2vw, 46px);
+
+    --text-hero:    clamp(40px, 9vw, 132px);
+    --text-sec:     clamp(24px, 4vw, 52px);
+    --text-sm2:     clamp(18px, 2.2vw, 28px);
+
+    --ease-expo:    cubic-bezier(.19, 1, .22, 1);
+  }
+
+  @layer components {
+    body { font-family: var(--font-body); font-weight: 300; }
+    ::selection { background: var(--color-neon); color: var(--color-ink); }
+
+    #grain {
+      background-image: var(--noise);
+      animation: grainshift 7s steps(6) infinite;
+    }
+    @keyframes grainshift {
+      0%,100%{transform:translate(0,0)}   16%{transform:translate(-14px,9px)}
+      32%{transform:translate(11px,-13px)} 48%{transform:translate(-9px,-8px)}
+      64%{transform:translate(13px,12px)}  80%{transform:translate(-12px,4px)}
+    }
+
+    .btn::before {
+      content:""; position:absolute; inset:0; z-index:1; background:var(--color-neon);
+      transform:scaleY(0); transform-origin:bottom;
+      transition:transform .5s var(--ease-expo);
+    }
+    .btn:hover::before { transform:scaleY(1); transform-origin:top }
+    .btn:hover span    { color:var(--color-ink) }
+
+    /* reveal-on-scroll, driven by the IntersectionObserver at the foot of the page */
+    .up { opacity:0; transform:translateY(16px); transition:opacity .8s var(--ease-expo), transform .8s var(--ease-expo) }
+    .up.in { opacity:1; transform:none }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation:none !important; transition-duration:.01ms !important }
+      .up { opacity:1; transform:none }
+    }
+  }
+</style>
+</head>
+
+<body class="bg-ink text-chalk font-body text-[14px] leading-[1.65] overflow-x-hidden">
+
+<svg width="0" height="0" class="absolute" aria-hidden="true">
+  <filter id="fx1">
+    <feTurbulence type="fractalNoise" baseFrequency="0.0055 0.011" numOctaves="4" seed="7"/>
+    <feColorMatrix type="saturate" values="0"/>
+    <feComponentTransfer><feFuncR type="table" tableValues="0 .05 .62 .28 1 .35 .9"/><feFuncG type="table" tableValues="0 .05 .62 .28 1 .35 .9"/><feFuncB type="table" tableValues="0 .05 .62 .28 1 .35 .9"/></feComponentTransfer>
+    <feColorMatrix type="matrix" values="0.20 0 0 0 0  0.78 0 0 0 0  0.24 0 0 0 0  0 0 0 1 0"/>
+  </filter>
+  <filter id="fx3">
+    <feTurbulence type="turbulence" baseFrequency="0.009 0.017" numOctaves="3" seed="88"/>
+    <feColorMatrix type="saturate" values="0"/>
+    <feColorMatrix type="matrix" values="0.20 0 0 0 0  0.78 0 0 0 0  0.24 0 0 0 0  0 0 0 1 0"/>
+  </filter>
+</svg>
+
+<div id="grain" aria-hidden="true"
+     class="pointer-events-none fixed -inset-[120px] z-[155] opacity-[.16] mix-blend-overlay"></div>
+
+<!-- ===== top bar ===== -->
+<header class="fixed inset-x-0 top-0 z-[120] flex items-center justify-between border-b border-hair bg-ink/85 px-pad py-3.5 backdrop-blur-sm">
+  <a href="index.html" class="group inline-flex items-center gap-3 text-[10.5px] tracking-[.14em] uppercase">
+    <span class="inline-block transition-transform duration-500 ease-expo group-hover:-translate-x-1">&larr;</span>
+    <span class="font-display text-[15px] tracking-normal">Sage&nbsp;X&nbsp;Limited</span>
+  </a>
+  <div class="flex items-center gap-5">
+    <a href="mailto:sagex.limited@gmail.com" class="hidden text-[10.5px] tracking-[.12em] text-haze uppercase hover:text-neon sm:block">sagex.limited@gmail.com</a>
+    <button id="theme-toggle" aria-label="Switch to dark mode" aria-pressed="true"
+            class="grid size-[32px] cursor-pointer place-items-center rounded-full border border-hair text-neon transition-colors duration-500 ease-expo hover:bg-neon hover:text-ink">
+      <svg viewBox="0 0 24 24" class="size-[14px]" fill="none" stroke="currentColor"
+           stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path id="ic-moon" class="hidden" d="M20.2 14.6A8.6 8.6 0 0 1 9.4 3.8a8.6 8.6 0 1 0 10.8 10.8Z"/>
+        <g id="ic-sun">
+          <circle cx="12" cy="12" r="4.1"/>
+          <path d="M12 2.2v2.3M12 19.5v2.3M2.2 12h2.3M19.5 12h2.3M5.1 5.1l1.6 1.6M17.3 17.3l1.6 1.6M18.9 5.1l-1.6 1.6M6.7 17.3l-1.6 1.6"/>
+        </g>
+      </svg>
+    </button>
+  </div>
+</header>
+
+<main>
+
+  <!-- ================= MASTHEAD ================= -->
+  <section class="relative flex min-h-[78svh] flex-col justify-end overflow-hidden px-pad pt-[110px] pb-[clamp(40px,8vh,90px)]">
+    <div class="tex"><svg preserveAspectRatio="xMidYMid slice"><rect width="100%" height="100%" filter="url(#fx1)"/></svg></div>
+    <div class="shade"></div>
+    <div class="relative z-[3] w-full">
+      <p class="up text-[11px] tracking-[.16em] text-haze uppercase">Service brochure · 2026</p>
+      <div class="mt-4 inline-block max-w-full">
+        <h1 class="-ml-[.04em] font-display text-hero leading-[.88] uppercase">Our Services</h1>
+        <p class="up mt-[clamp(6px,1.2vh,16px)] text-right text-[clamp(13px,1.5vw,20px)] text-neon/90">Creative Product Engineering &amp; ADs</p>
+      </div>
+      <p class="up mt-8 max-w-[62ch] text-[14px] leading-[1.9] text-neon/65">
+        Sage X Limited is a product engineering studio in Port Harcourt. We take products from a rough
+        idea to something people open every day, and we run the advertising that puts them in front of
+        buyers. This page is the full list — what each engagement covers, and what the ads work costs.
+      </p>
+      <div class="up mt-9 flex flex-wrap items-center gap-x-7 gap-y-4">
+        <a href="#ads" class="btn relative isolate inline-block overflow-hidden border border-hair px-[22px] py-3 text-[10.5px] tracking-[.13em] uppercase"><span class="relative z-[2] transition-colors duration-500 ease-expo">Jump to ads rates</span></a>
+        <a href="mailto:sagex.limited@gmail.com" class="group inline-flex items-center gap-2.5 text-[10.5px] tracking-[.13em] uppercase transition-opacity duration-300 hover:opacity-60">Start a conversation<span class="inline-block transition-transform duration-500 ease-expo group-hover:translate-x-1.5">&rarr;</span></a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= LIFECYCLE ================= -->
+  <section id="lifecycle" class="relative overflow-hidden border-t border-hair px-pad py-[clamp(56px,10vh,120px)]">
+    <div class="relative z-[3] mx-auto w-full max-w-[1240px]">
+      <p class="up text-[11px] tracking-[.14em] text-haze uppercase">01 · Software development</p>
+      <h2 class="up mt-3 font-display text-sec leading-[.95] uppercase">The full lifecycle</h2>
+      <p class="up mt-4 max-w-[60ch] text-[13.5px] leading-[1.85] text-neon/65">
+        Six stages, start to finish. Come in at the beginning, or hand us something half-built and
+        we'll pick it up from wherever it stalled.
+      </p>
+
+      <div class="mt-10 grid gap-x-10 gap-y-8 sm:grid-cols-2 lg:grid-cols-3">
+        <div class="up border-t border-hair pt-4">
+          <span class="text-[10px] tracking-[.14em] text-haze">STAGE 01</span>
+          <h3 class="mt-1.5 mb-2 font-display text-[17px] uppercase">Discovery &amp; scoping</h3>
+          <p class="text-[12.5px] leading-[1.8] text-neon/60">We work out what's actually being built and what it costs before anyone opens an editor. You get scope, timeline, and risk in plain sentences you can hold us to.</p>
+        </div>
+        <div class="up border-t border-hair pt-4">
+          <span class="text-[10px] tracking-[.14em] text-haze">STAGE 02</span>
+          <h3 class="mt-1.5 mb-2 font-display text-[17px] uppercase">Product design</h3>
+          <p class="text-[12.5px] leading-[1.8] text-neon/60">Flows, screens, and a component set — designed against real content, not lorem ipsum, so the build has nothing left to guess at.</p>
+        </div>
+        <div class="up border-t border-hair pt-4">
+          <span class="text-[10px] tracking-[.14em] text-haze">STAGE 03</span>
+          <h3 class="mt-1.5 mb-2 font-display text-[17px] uppercase">Build</h3>
+          <p class="text-[12.5px] leading-[1.8] text-neon/60">Short cycles with something running at the end of each one. Web platforms, mobile apps, and the APIs and databases underneath them.</p>
+        </div>
+        <div class="up border-t border-hair pt-4">
+          <span class="text-[10px] tracking-[.14em] text-haze">STAGE 04</span>
+          <h3 class="mt-1.5 mb-2 font-display text-[17px] uppercase">QA &amp; launch</h3>
+          <p class="text-[12.5px] leading-[1.8] text-neon/60">Real-device testing, load and edge cases, deploy pipeline, monitoring and alerts wired up before the first user arrives.</p>
+        </div>
+        <div class="up border-t border-hair pt-4">
+          <span class="text-[10px] tracking-[.14em] text-haze">STAGE 05</span>
+          <h3 class="mt-1.5 mb-2 font-display text-[17px] uppercase">Handover</h3>
+          <p class="text-[12.5px] leading-[1.8] text-neon/60">Source, infrastructure, and accounts in your name, with documentation and a walkthrough for whoever maintains it next — including us, if that's the arrangement.</p>
+        </div>
+        <div class="up border-t border-hair pt-4">
+          <span class="text-[10px] tracking-[.14em] text-haze">STAGE 06</span>
+          <h3 class="mt-1.5 mb-2 font-display text-[17px] uppercase">Care &amp; continuity</h3>
+          <p class="text-[12.5px] leading-[1.8] text-neon/60">Retained support after launch: fixes, dependency and security updates, performance work, and new features as the product earns them.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= WHAT WE BUILD ================= -->
+  <section id="build" class="relative overflow-hidden border-t border-hair px-pad py-[clamp(56px,10vh,120px)]">
+    <div class="tex opacity-[.18]"><svg preserveAspectRatio="xMidYMid slice"><rect width="100%" height="100%" filter="url(#fx3)"/></svg></div>
+    <div class="shade"></div>
+    <div class="relative z-[3] mx-auto w-full max-w-[1240px]">
+      <p class="up text-[11px] tracking-[.14em] text-haze uppercase">02 · Disciplines</p>
+      <h2 class="up mt-3 font-display text-sec leading-[.95] uppercase">What we build</h2>
+
+      <div class="mt-10 grid gap-x-10 gap-y-8 md:grid-cols-2">
+        <div class="up border-t border-hair pt-4">
+          <h3 class="mb-2 font-display text-sm2 uppercase">Web platforms</h3>
+          <p class="text-[13px] leading-[1.85] text-neon/60">Next.js front ends over typed APIs — storefronts, dashboards, booking flows, and the admin nobody else wants to build. Server-rendered where it matters for speed and search.</p>
+          <p class="mt-2.5 text-[11px] tracking-[.05em] text-haze">Next.js · TypeScript · Postgres · Prisma</p>
+        </div>
+        <div class="up border-t border-hair pt-4">
+          <h3 class="mb-2 font-display text-sm2 uppercase">Mobile apps</h3>
+          <p class="text-[13px] leading-[1.85] text-neon/60">One React Native codebase to both stores, with offline and retry states that hold on a bad connection. Store submission and release management included.</p>
+          <p class="mt-2.5 text-[11px] tracking-[.05em] text-haze">React Native · Expo · EAS</p>
+        </div>
+        <div class="up border-t border-hair pt-4">
+          <h3 class="mb-2 font-display text-sm2 uppercase">Backend &amp; infrastructure</h3>
+          <p class="text-[13px] leading-[1.85] text-neon/60">APIs, databases, queues, and integrations — payments, messaging, maps, whatever the product leans on. Deploys, backups, and monitoring that tells you before your users do.</p>
+          <p class="mt-2.5 text-[11px] tracking-[.05em] text-haze">Node · NestJS · Postgres · Redis</p>
+        </div>
+        <div class="up border-t border-hair pt-4">
+          <h3 class="mb-2 font-display text-sm2 uppercase">Creative &amp; advertising</h3>
+          <p class="text-[13px] leading-[1.85] text-neon/60">HTML5 display sets built to spec and weight budget across every placement in the buy, plus motion ads, graphics and video cutdowns — and the campaign management on the next screen.</p>
+          <p class="mt-2.5 text-[11px] tracking-[.05em] text-haze">HTML5 · GSAP · Meta &amp; TikTok Ads</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= ADS RATES ================= -->
+  <section id="ads" class="relative overflow-hidden border-t border-hair px-pad py-[clamp(56px,10vh,120px)]">
+    <div class="relative z-[3] mx-auto w-full max-w-[1240px]">
+      <p class="up text-[11px] tracking-[.14em] text-haze uppercase">03 · Advertising</p>
+      <h2 class="up mt-3 font-display text-sec leading-[.95] uppercase">Social media ads campaigns — rates</h2>
+
+      <div class="mt-9 grid gap-x-14 gap-y-10 lg:grid-cols-[1fr_.85fr] lg:items-start">
+        <div>
+          <h3 class="up font-display text-sm2 uppercase">Overview</h3>
+          <p class="up mt-3 max-w-[58ch] text-[13.5px] leading-[1.9] text-neon/65">
+            We run end-to-end Meta and TikTok ads campaign creation and management for businesses looking
+            to advertise effectively on Facebook, Instagram and TikTok. You provide the advertising
+            assets, and we handle the campaign from setup to completion.
+          </p>
+
+          <h3 class="up mt-10 font-display text-sm2 uppercase">What's included</h3>
+          <p class="up mt-3 max-w-[58ch] text-[13.5px] leading-[1.9] text-neon/65">
+            We work to your specific business goal — more followers, visibility and awareness, leads,
+            traffic, or bookings. Strategy and optimisation are tailored around that goal.
+          </p>
+          <ul class="up mt-5 grid max-w-[58ch] gap-y-2.5 sm:grid-cols-2 sm:gap-x-8">
+            <li class="flex gap-3 border-t border-hair pt-2.5 text-[12.5px] leading-[1.6] text-neon/70"><span class="text-haze">01</span>Campaign setup and configuration</li>
+            <li class="flex gap-3 border-t border-hair pt-2.5 text-[12.5px] leading-[1.6] text-neon/70"><span class="text-haze">02</span>Audience targeting</li>
+            <li class="flex gap-3 border-t border-hair pt-2.5 text-[12.5px] leading-[1.6] text-neon/70"><span class="text-haze">03</span>Ad set and placement setup</li>
+            <li class="flex gap-3 border-t border-hair pt-2.5 text-[12.5px] leading-[1.6] text-neon/70"><span class="text-haze">04</span>Budget and scheduling</li>
+            <li class="flex gap-3 border-t border-hair pt-2.5 text-[12.5px] leading-[1.6] text-neon/70"><span class="text-haze">05</span>Campaign launch</li>
+            <li class="flex gap-3 border-t border-hair pt-2.5 text-[12.5px] leading-[1.6] text-neon/70"><span class="text-haze">06</span>Performance monitoring</li>
+            <li class="flex gap-3 border-t border-hair pt-2.5 text-[12.5px] leading-[1.6] text-neon/70"><span class="text-haze">07</span>Campaign optimisation</li>
+            <li class="flex gap-3 border-t border-hair pt-2.5 text-[12.5px] leading-[1.6] text-neon/70"><span class="text-haze">08</span>Troubleshooting and management throughout the active period</li>
+            <li class="flex gap-3 border-t border-hair pt-2.5 text-[12.5px] leading-[1.6] text-neon/70"><span class="text-haze">09</span>End-of-campaign performance report</li>
+          </ul>
+
+          <h3 class="up mt-10 font-display text-sm2 uppercase">Campaign reporting</h3>
+          <p class="up mt-3 max-w-[58ch] text-[13.5px] leading-[1.9] text-neon/65">
+            At the end of the campaign we provide a summary of performance, including the relevant metrics:
+          </p>
+          <ul class="up mt-4 flex max-w-[58ch] flex-wrap gap-2.5">
+            <li class="border border-hair px-3 py-1.5 text-[11px] tracking-[.08em] uppercase">People reached</li>
+            <li class="border border-hair px-3 py-1.5 text-[11px] tracking-[.08em] uppercase">Views</li>
+            <li class="border border-hair px-3 py-1.5 text-[11px] tracking-[.08em] uppercase">Followers gained</li>
+            <li class="border border-hair px-3 py-1.5 text-[11px] tracking-[.08em] uppercase">Conversions, where tracking is available</li>
+            <li class="border border-hair px-3 py-1.5 text-[11px] tracking-[.08em] uppercase">Overall performance</li>
+          </ul>
+        </div>
+
+        <div class="up">
+          <h3 class="font-display text-sm2 uppercase">Duration &amp; pricing</h3>
+          <p class="mt-3 text-[13px] leading-[1.8] text-neon/60">
+            Our rate for Meta and TikTok campaign creation and management is based on the duration of the campaign.
+          </p>
+
+          <div class="mt-6 border-t border-hair">
+            <div class="flex items-baseline justify-between gap-4 border-b border-hair py-2.5 text-[10px] tracking-[.14em] text-haze uppercase">
+              <span>Campaign period</span><span>Management fee</span>
+            </div>
+            <div class="flex items-baseline justify-between gap-4 border-b border-hair py-4">
+              <span class="font-display text-[clamp(16px,2vw,22px)] uppercase">1 Week</span>
+              <span class="font-display text-[clamp(16px,2vw,22px)]">&#8358;25,000</span>
+            </div>
+            <div class="flex items-baseline justify-between gap-4 border-b border-hair py-4">
+              <span class="font-display text-[clamp(16px,2vw,22px)] uppercase">2 Weeks</span>
+              <span class="font-display text-[clamp(16px,2vw,22px)]">&#8358;50,000</span>
+            </div>
+            <div class="flex items-baseline justify-between gap-4 border-b border-hair py-4">
+              <span class="font-display text-[clamp(16px,2vw,22px)] uppercase">3 Weeks</span>
+              <span class="font-display text-[clamp(16px,2vw,22px)]">&#8358;75,000</span>
+            </div>
+            <div class="flex items-baseline justify-between gap-4 border-b border-hair py-4">
+              <span class="font-display text-[clamp(16px,2vw,22px)] uppercase">4 Weeks</span>
+              <span class="font-display text-[clamp(16px,2vw,22px)]">&#8358;100,000</span>
+            </div>
+          </div>
+
+          <div class="mt-7 border border-hair p-5">
+            <p class="text-[10px] tracking-[.14em] text-haze uppercase">Please note</p>
+            <p class="mt-2.5 text-[12.5px] leading-[1.8] text-neon/65">
+              Meta and TikTok advertising spend is separate from the management fee and remains the
+              client's responsibility. The client provides the assets needed for a successful campaign —
+              images, videos and so on. If you need us to create the videos, graphics, motion ads, HTML5
+              interactive ads or other advertising creatives, that is billed separately based on the
+              scope of the creative work.
+            </p>
+            <p class="mt-4 text-[10px] tracking-[.14em] text-haze uppercase">Payment</p>
+            <p class="mt-2.5 text-[12.5px] leading-[1.8] text-neon/65">
+              The campaign management fee is paid before the campaign begins.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= CONTACT ================= -->
+  <section class="relative overflow-hidden border-t border-hair px-pad py-[clamp(64px,12vh,140px)] text-center">
+    <div class="tex opacity-[.16]"><svg preserveAspectRatio="xMidYMid slice"><rect width="100%" height="100%" filter="url(#fx1)"/></svg></div>
+    <div class="shade"></div>
+    <div class="relative z-[3] mx-auto w-full max-w-[860px]">
+      <h2 class="up font-display text-sec leading-[.95] uppercase">Let's turn your budget into a measurable campaign</h2>
+      <p class="up mx-auto mt-4 max-w-[46ch] text-[13.5px] leading-[1.9] text-neon/65">
+        Properly structured, actively managed, and reported on at the end. Tell us the goal and the
+        window, and we'll come back with the plan.
+      </p>
+      <a href="mailto:sagex.limited@gmail.com" class="up mt-6 inline-block font-display text-[clamp(17px,2.6vw,34px)] break-all uppercase">sagex.limited@gmail.com</a>
+      <p class="up mt-3 text-[12px] tracking-[.05em] text-haze">Aba Road, Port Harcourt · Rivers State, Nigeria</p>
+      <div class="up mt-9 flex flex-wrap items-center justify-center gap-x-7 gap-y-4">
+        <a href="index.html#work" class="btn relative isolate inline-block overflow-hidden border border-hair px-[22px] py-3 text-[10.5px] tracking-[.13em] uppercase"><span class="relative z-[2] transition-colors duration-500 ease-expo">See selected work</span></a>
+        <a href="index.html" class="group inline-flex items-center gap-2.5 text-[10.5px] tracking-[.13em] uppercase transition-opacity duration-300 hover:opacity-60"><span class="inline-block transition-transform duration-500 ease-expo group-hover:-translate-x-1.5">&larr;</span>Back to the studio</a>
+      </div>
+      <p class="up mt-14 text-[9.5px] tracking-[.13em] text-neon/30 uppercase">© 2026 Sage X Limited — Software engineering studio</p>
+    </div>
+  </section>
+
+</main>
+
+<script>
+(function () {
+  "use strict";
+
+  /* ---------- theme ---------- */
+  (function theme() {
+    var root = document.documentElement,
+        btn  = document.getElementById('theme-toggle'),
+        moon = document.getElementById('ic-moon'),
+        sun  = document.getElementById('ic-sun');
+    if (!btn) return;
+
+    function paint(mode) {
+      var light = mode === 'light';
+      root.setAttribute('data-theme', mode);
+      btn.setAttribute('aria-pressed', String(light));
+      btn.setAttribute('aria-label', light ? 'Switch to dark mode' : 'Switch to light mode');
+      moon.classList.toggle('hidden', light);
+      sun.classList.toggle('hidden', !light);
+    }
+
+    paint(root.getAttribute('data-theme') === 'dark' ? 'dark' : 'light');
+
+    btn.addEventListener('click', function () {
+      var next = root.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
+      try { localStorage.setItem('sagex-theme', next); } catch (e) {}
+      paint(next);
+    });
+  })();
+
+  /* ---------- generated grain (same as index.html) ---------- */
+  (function grain() {
+    var c = document.createElement('canvas'); c.width = c.height = 160;
+    var x = c.getContext('2d'), d = x.createImageData(160, 160), p = d.data;
+    for (var i = 0; i < p.length; i += 4) {
+      var v = (Math.random() * 255) | 0;
+      p[i] = p[i + 1] = p[i + 2] = v; p[i + 3] = 255;
+    }
+    x.putImageData(d, 0, 0);
+    document.documentElement.style.setProperty('--noise', 'url(' + c.toDataURL() + ')');
+  })();
+
+  /* ---------- reveal on scroll ---------- */
+  var ups = document.querySelectorAll('.up');
+  if (!('IntersectionObserver' in window)) {
+    ups.forEach(function (n) { n.classList.add('in'); });
+    return;
+  }
+  var io = new IntersectionObserver(function (entries) {
+    entries.forEach(function (e) {
+      if (!e.isIntersecting) return;
+      e.target.classList.add('in');
+      io.unobserve(e.target);
+    });
+  }, { rootMargin: '0px 0px -8% 0px', threshold: .12 });
+  ups.forEach(function (n) { io.observe(n); });
+})();
+</script>
+</body>
+</html>

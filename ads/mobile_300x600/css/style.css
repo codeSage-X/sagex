@@ -1,0 +1,101 @@
+/* Merge into your existing css/style.css — keep whatever reset you already have */
+
+html, body {
+    margin: 0;
+    padding: 0;
+    background: #000;
+    -webkit-text-size-adjust: 100%;
+}
+
+.wrapper {
+    position: relative;
+    width: 300px;
+    height: 600px;
+    overflow: hidden;
+    opacity: 0;              /* faded up in init() */
+    cursor: pointer;
+    font-family: Arial, Helvetica, sans-serif; /* swap for your @font-face */
+}
+
+.fw,
+.bg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+}
+
+/* ---------------------------------------------------------------- panels */
+/* EskimiDef sets background-image on these from the class asset list */
+
+.bg,
+.bg2,
+.bg3,
+.bg4,
+.bg5 {
+    visibility: hidden;                    /* autoAlpha takes over */
+    clip-path: inset(100% 0% 0% 0%);
+    -webkit-clip-path: inset(100% 0% 0% 0%);
+    background-repeat: no-repeat;
+    background-position: center center;
+    background-size: 100% 100%;            /* 300x600 art, exact fit */
+    will-change: clip-path;
+}
+
+/* ---------------------------------------------------------------- text */
+
+.t1, .t2, .t3, .t4, .t5 {
+    z-index: 100;
+    pointer-events: none;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: 0 26px 66px;
+    color: #ffffff;
+    top: -50px;
+}
+
+.eyebrow {
+    font-size: 10px;
+    line-height: 1;
+    letter-spacing: 0.26em;
+    text-transform: uppercase;
+    opacity: 0.75;
+    /* text-shadow: 0 2px 4px rgba(0, 0, 0, 0.85); */
+    margin: 0 0 6px;
+    margin-left:2px;
+}
+
+.headline {
+    font-size: 40px;
+    line-height: 1.02;
+    letter-spacing: -0.02em;
+    font-weight: 700;
+    /* text-shadow: 0 3px 6px rgba(0, 0, 0, 0.9); */
+    margin: 0 0 6px;
+}
+
+.sub {
+    font-size: 13px;
+    line-height: 1;
+    font-weight: 400;
+    opacity: 0.85;
+    /* text-shadow: 0 2px 4px rgba(0, 0, 0, 0.85); */
+    margin: 0;
+}
+
+/* word masks — created at runtime by buildText() */
+
+.word-mask {
+    display: inline-block;
+    overflow: hidden;
+    vertical-align: bottom;
+    padding-bottom: 0.14em;   /* keeps descenders off the mask edge */
+    margin-bottom: -0.14em;
+}
+
+.word {
+    display: inline-block;
+    will-change: transform;
+}

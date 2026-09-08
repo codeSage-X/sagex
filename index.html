@@ -1,0 +1,1221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sage X Limited — Software Engineering</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+
+<script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+
+<!-- Critical CSS: paints before Tailwind compiles, so the loader masks the FOUC.
+     It also owns the theme: dark is the default, [data-theme="light"] flips it. -->
+<style>
+  :root{
+    --page-bg:#050705;
+    --page-fg:#39ff14;
+    --loader-bg:#000;
+    --veil:5 7 5;          /* scrim base — used as rgb(var(--veil) / .x) */
+    --plate:#070b07;       /* backing behind image plates */
+  }
+  /* Tailwind's @theme tokens sit in a cascade layer, so these unlayered
+     declarations outrank them and re-colour every bg-ink / text-neon /
+     border-hair / text-haze on the page in one move. */
+  :root[data-theme="light"]{
+    --page-bg:#ffffff;
+    --page-fg:#000000;
+    --loader-bg:#fff;
+    --veil:255 255 255;
+    --plate:#f2f2f2;
+
+    --color-ink:#ffffff;
+    --color-ink-2:#f5f5f5;
+    --color-neon:#000000;
+    --color-chalk:#000000;
+    --color-paper:#000000;
+    --color-haze:#5a5a5a;
+    --color-plum:#ebebeb;
+    --color-hair:rgba(0,0,0,.18);
+  }
+
+  html,body{margin:0;background:var(--page-bg);color:var(--page-fg)}
+  #loader{position:fixed;inset:0;z-index:210;background:var(--loader-bg);display:grid;place-items:center}
+  #mark{width:min(74vw,780px);height:auto;overflow:visible;display:block}
+  #mark .ln{visibility:hidden}
+  #mark-lines{stroke:var(--color-neon,#39ff14)}          /* CSS beats the stroke="" attribute */
+  #tracer{visibility:hidden}
+  #tracer rect{fill:var(--color-neon,#39ff14)}
+  #wipe{position:fixed;inset:0;z-index:200;pointer-events:none;visibility:hidden;
+        display:grid;grid-template-columns:repeat(4,1fr)}
+  #wipe span{background:var(--page-bg);transform:scaleY(0);transform-origin:top;will-change:transform}
+
+  /* The fractal-noise cloud plates are off in BOTH themes — the smoke read as
+     dirt on the backgrounds. Flip this to `display:block` to bring them back. */
+  .tex, .noise-plate{display:none}
+
+  /* structural column rules — faded out while the Services section is on screen */
+  #rules{transition:opacity .45s cubic-bezier(.19,1,.22,1)}
+  .no-rules #rules{opacity:0}
+
+  /* Embedded banner: rendered at its native 300x600 and scaled to contain, so
+     the creative is never cropped. --adk is set per tile by the ResizeObserver. */
+  .ad-frame{
+    width:300px;height:600px;
+    transform:translate(-50%,-50%) scale(var(--adk,.5));
+    transform-origin:center;
+  }
+  .ad-frame-250{
+    width:300px;height:250px;
+    transform:translate(-50%,-50%) scale(var(--adk250,.5));
+    transform-origin:center;
+  }
+
+  /* scrims: one veil colour per theme instead of hardcoded rgba() */
+  .scrim-diag     {background:repeating-linear-gradient(45deg,transparent 0 3px,rgb(var(--veil)/.34) 3px 6px)}
+  .scrim-diag-hard{background:repeating-linear-gradient(45deg,transparent 0 3px,rgb(var(--veil)/.5) 3px 6px)}
+  .scrim-h        {background:linear-gradient(90deg,rgb(var(--veil)/.7),rgb(var(--veil)/.24) 55%,rgb(var(--veil)/.46))}
+  /* solid caption bar, not a fade — the gradient dithered against the screenshot's
+     white pixels and picked up the grain overlay, which read as dust */
+  .cap-fade       {background:rgb(var(--veil)/.92)}
+  .plate          {background:var(--plate)}
+
+  /* the handful of pieces that aren't token-driven */
+  :root[data-theme="light"] #cursor{mix-blend-mode:normal}
+
+  /* Light mode is plain paper: no film grain, no fx* noise plates, no diagonal
+     hatch. The hatch only ever read as "lines" because its stripes are the veil
+     colour — on white they sat over the grey noise beneath and striped it. */
+  :root[data-theme="light"] #grain,
+  :root[data-theme="light"] .mos svg,
+  :root[data-theme="light"] main svg:has(> rect[filter]){display:none}
+  :root[data-theme="light"] .scrim-diag,
+  :root[data-theme="light"] .scrim-diag-hard{background:none}
+
+  /* Static ripple fallback. In light mode it drops to 30% over the white page
+     ground, which lifts the dark photo the way the shader's uLight path does
+     while keeping its hue — no filter chain to keep in sync. */
+  :root[data-theme="light"] .ripple-fallback{opacity:.3}
+
+  /* thinner veil on paper — at dark-mode strength it buries the photo in white */
+  :root[data-theme="light"] .scrim-h{background:linear-gradient(90deg,rgb(var(--veil)/.5),rgb(var(--veil)/.06) 55%,rgb(var(--veil)/.28))}
+  :root[data-theme="light"] .mos>div{background:#efefef;color:#000}
+  :root[data-theme="light"] .mos>.m3{background:#000;color:#fff}
+  :root[data-theme="light"] .mos>.m4{background:#dcdcdc}
+  :root[data-theme="light"] .mos>.m6{background:#fff}
+
+  /* menu slice hover — unlayered so it outranks Tailwind's utilities layer.
+     width:max-content shrinks each anchor to its own word, so the blade below
+     spans the text instead of the full row. */
+  #menu a{position:relative;width:max-content;max-width:100%}
+  #menu a:hover{z-index:2}
+  #menu.slices-live a{overflow:visible}
+
+  .slice{position:relative;display:block;color:transparent}
+  .slice::before,
+  .slice::after{
+    content:attr(data-text);
+    position:absolute;inset:0;
+    color:var(--color-neon,#39ff14);
+    will-change:transform;
+    transition:transform .4s cubic-bezier(.19,1,.22,1);
+  }
+  .slice::before{clip-path:inset(0 0 52% 0)}   /* 52/48 overlap kills the seam */
+  .slice::after {clip-path:inset(48% 0 0 0)}
+
+  /* 3px of total separation — 1.2 up, 1.8 down. px not em, so the gap stays a
+     hairline-ish sliver at every step of the clamp() rather than scaling up. */
+  #menu a:hover .slice::before{transform:translate(-.018em,-1.2px)}
+  #menu a:hover .slice::after {transform:translate( .018em, 1.8px)}
+  /* the cut trails the blade by 120ms */
+  #menu a:hover .slice::before,
+  #menu a:hover .slice::after{transition:transform .3s cubic-bezier(.19,1,.22,1) .12s}
+
+  /* the blade: sweeps left→right in 220ms, then the trail fades out. 380ms total. */
+  #menu a::after{
+    content:"";
+    position:absolute;left:0;top:50%;z-index:3;
+    width:100%;height:max(2px,.02em);
+    background:linear-gradient(90deg,transparent,var(--color-neon,#39ff14) 9%,var(--color-neon,#39ff14) 91%,transparent);
+    transform:translateY(-50%) rotate(-1.2deg) scaleX(0);
+    transform-origin:left center;
+    pointer-events:none;
+    transition:transform 0s,opacity 0s;          /* no retract animation on leave */
+  }
+  #menu.slices-live a:hover::after{
+    transform:translateY(-50%) rotate(-1.2deg) scaleX(1);
+    opacity:0;
+    transition:transform .22s cubic-bezier(.2,.7,.2,1),opacity .16s linear .22s;
+  }
+</style>
+
+<!-- Stamp the theme before first paint so there is no flash of the wrong palette.
+     Light is the default; only an explicitly stored "dark" opts out. -->
+<script>
+  (function () {
+    var m; try { m = localStorage.getItem('sagex-theme'); } catch (e) {}
+    document.documentElement.setAttribute('data-theme', m === 'dark' ? 'dark' : 'light');
+  })();
+</script>
+
+<style type="text/tailwindcss">
+  @theme {
+    --color-ink:    #050705;
+    --color-ink-2:  #0a0e0a;
+    --color-neon:   #39ff14;
+    --color-chalk:  #39ff14;
+    --color-haze:   #5f9152;
+    --color-paper:  #39ff14;
+    --color-plum:   #0d2b06;
+    --color-hair:   rgba(57,255,20,.16);
+
+    --font-display: "Anton","Oswald","Arial Narrow","Liberation Sans Narrow",Impact,sans-serif;
+    --font-body:    "Inter",ui-sans-serif,system-ui,sans-serif;
+
+    --spacing-pad:   clamp(18px, 3.2vw, 46px);
+    --spacing-bar:   58px;
+    --spacing-strip: clamp(150px, 22vh, 240px);
+
+    --text-hero:    clamp(48px, 13vw, 200px);
+    --text-sec:     clamp(26px, 4.4vw, 60px);
+    --text-sm2:     clamp(19px, 2.3vw, 30px);
+    --text-mos:     clamp(11px, 1.5vw, 19px);
+    --text-eyebrow: clamp(13px, 1.5vw, 20px);
+    --text-kick:    clamp(15px, 1.55vw, 21px);
+    --text-sub:     clamp(15px, 1.5vw, 20px);
+
+    --ease-expo:    cubic-bezier(.19, 1, .22, 1);
+  }
+
+  @layer components {
+    body { font-family: var(--font-body); font-weight: 300; }
+    ::selection { background: var(--color-neon); color: var(--color-ink); }
+
+    .ch { will-change: transform; }
+
+    #grain {
+      background-image: var(--noise);
+      animation: grainshift 7s steps(6) infinite;
+    }
+    @keyframes grainshift {
+      0%,100%{transform:translate(0,0)}   16%{transform:translate(-14px,9px)}
+      32%{transform:translate(11px,-13px)} 48%{transform:translate(-9px,-8px)}
+      64%{transform:translate(13px,12px)}  80%{transform:translate(-12px,4px)}
+    }
+
+    .tex   { position:absolute; inset:0; z-index:0; opacity:.4 }
+    .tex svg { width:100%; height:100%; display:block }
+    .shade {
+      position:absolute; inset:0; z-index:1;
+      background:linear-gradient(180deg,rgb(var(--veil)/.88) 0%,rgb(var(--veil)/.55) 45%,rgb(var(--veil)/.95) 100%);
+    }
+
+    .btn::before {
+      content:""; position:absolute; inset:0; z-index:1; background:var(--color-neon);
+      transform:scaleY(0); transform-origin:bottom;
+      transition:transform .5s var(--ease-expo);
+    }
+    .btn:hover::before { transform:scaleY(1); transform-origin:top }
+    .btn:hover span    { color:var(--color-ink) }
+
+    .idx-row::after {
+      content:""; position:absolute; left:0; bottom:-1px; height:1px; width:0;
+      background:var(--color-neon); transition:width .7s var(--ease-expo);
+    }
+    .idx-row:hover::after { width:100% }
+
+    /* --mos-row is set by JS to whatever makes the 2x2 ad cell exactly 300:600,
+       so the embedded banner fills it with no side gaps and no crop. The clamp
+       is the no-JS fallback. */
+    .mos {
+      display:grid; gap:5px;
+      grid-template-columns:repeat(6,1fr);
+      grid-auto-rows:var(--mos-row,clamp(76px,12vw,168px));
+      grid-template-areas:
+        "a a b b c c"
+        "a a d d c c"
+        "e e d d f f";
+    }
+    .m1{grid-area:a}.m2{grid-area:b}.m3{grid-area:c}
+    .m4{grid-area:d}.m5{grid-area:e}.m6{grid-area:f}
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation:none !important; transition-duration:.01ms !important }
+    }
+  }
+</style>
+</head>
+
+<body class="bg-ink text-chalk font-body text-[14px] leading-[1.65] overflow-x-hidden">
+
+<!-- Texture filters. The trailing feColorMatrix pushes desaturated luminance into green. -->
+<svg width="0" height="0" class="absolute" aria-hidden="true">
+  <filter id="fx1">
+    <feTurbulence type="fractalNoise" baseFrequency="0.0055 0.011" numOctaves="4" seed="7"/>
+    <feColorMatrix type="saturate" values="0"/>
+    <feComponentTransfer><feFuncR type="table" tableValues="0 .05 .62 .28 1 .35 .9"/><feFuncG type="table" tableValues="0 .05 .62 .28 1 .35 .9"/><feFuncB type="table" tableValues="0 .05 .62 .28 1 .35 .9"/></feComponentTransfer>
+    <feColorMatrix type="matrix" values="0.20 0 0 0 0  0.78 0 0 0 0  0.24 0 0 0 0  0 0 0 1 0"/>
+  </filter>
+  <filter id="fx2">
+    <feTurbulence type="fractalNoise" baseFrequency="0.013 0.006" numOctaves="5" seed="31"/>
+    <feColorMatrix type="saturate" values="0"/>
+    <feComponentTransfer><feFuncR type="table" tableValues="0 .7 .1 .95 .2 .8"/><feFuncG type="table" tableValues="0 .7 .1 .95 .2 .8"/><feFuncB type="table" tableValues="0 .7 .1 .95 .2 .8"/></feComponentTransfer>
+    <feColorMatrix type="matrix" values="0.20 0 0 0 0  0.78 0 0 0 0  0.24 0 0 0 0  0 0 0 1 0"/>
+  </filter>
+  <filter id="fx3">
+    <feTurbulence type="turbulence" baseFrequency="0.009 0.017" numOctaves="3" seed="88"/>
+    <feColorMatrix type="saturate" values="0"/>
+    <feColorMatrix type="matrix" values="0.20 0 0 0 0  0.78 0 0 0 0  0.24 0 0 0 0  0 0 0 1 0"/>
+  </filter>
+  <filter id="fx4">
+    <feTurbulence type="fractalNoise" baseFrequency="0.02" numOctaves="4" seed="5"/>
+    <feColorMatrix type="saturate" values="0"/>
+    <feComponentTransfer><feFuncA type="linear" slope=".55"/></feComponentTransfer>
+    <feColorMatrix type="matrix" values="0.20 0 0 0 0  0.78 0 0 0 0  0.24 0 0 0 0  0 0 0 1 0"/>
+  </filter>
+  <filter id="fx5">
+    <feTurbulence type="fractalNoise" baseFrequency="0.004 0.009" numOctaves="5" seed="19"/>
+    <feColorMatrix type="saturate" values="0"/>
+    <feComponentTransfer><feFuncR type="table" tableValues="0 .06 .7 .22 1 .34 .95"/><feFuncG type="table" tableValues="0 .06 .7 .22 1 .34 .95"/><feFuncB type="table" tableValues="0 .06 .7 .22 1 .34 .95"/></feComponentTransfer>
+    <feColorMatrix type="matrix" values="0.20 0 0 0 0  0.78 0 0 0 0  0.24 0 0 0 0  0 0 0 1 0"/>
+  </filter>
+</svg>
+
+<!-- ===== fixed chrome: lives OUTSIDE #smooth-wrapper ===== -->
+
+<!-- Loader: pitch black plate, wordmark drawn by a MotionPath tracer.
+     Swap the .ln paths for the vector version of logo.png when you have it —
+     any number of subpaths works, they draw in document order. -->
+<div id="loader">
+  <svg id="mark" viewBox="0 0 568 192" role="img" aria-label="Sage X Limited">
+    <defs>
+      <filter id="mark-glow" x="-25%" y="-60%" width="150%" height="220%">
+        <feGaussianBlur stdDeviation="6" result="b"/>
+        <feMerge><feMergeNode in="b"/><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+      </filter>
+    </defs>
+
+    <g id="mark-lines" fill="none" stroke="#39ff14" stroke-width="11"
+       stroke-linecap="square" stroke-linejoin="miter" filter="url(#mark-glow)">
+      <!-- S -->
+      <path class="ln" d="M114 40 H44 L30 54 V82 L44 96 H100 L114 110 V138 L100 152 H30"/>
+      <!-- A -->
+      <path class="ln" d="M136 152 L176 46 L182 40 H220 V152"/>
+      <path class="ln" d="M159 110 H220"/>
+      <!-- G -->
+      <path class="ln" d="M326 54 L312 40 H256 L242 54 V138 L256 152 H312 L326 138 V96 H284"/>
+      <!-- E -->
+      <path class="ln" d="M432 40 H348 V152 H432"/>
+      <path class="ln" d="M348 96 H410"/>
+      <!-- X -->
+      <path class="ln" d="M454 40 L538 152"/>
+      <path class="ln" d="M538 40 L454 152"/>
+    </g>
+
+    <g id="tracer" filter="url(#mark-glow)">
+      <rect x="-9" y="-9" width="18" height="18" fill="#39ff14"/>
+    </g>
+  </svg>
+</div>
+
+<div id="wipe" aria-hidden="true"></div>
+
+<!-- structural column rules, aligned to the wipe columns -->
+<div id="rules" aria-hidden="true" class="pointer-events-none fixed inset-0 z-[55] hidden grid-cols-4 opacity-[.1] md:grid">
+  <span></span>
+  <span class="border-l border-neon"></span>
+  <span class="border-l border-neon"></span>
+  <span class="border-l border-neon"></span>
+</div>
+
+<div id="cursor" aria-hidden="true"
+     class="pointer-events-none fixed top-0 left-0 z-[180] hidden size-[7px] -translate-x-1/2 -translate-y-1/2 border border-neon mix-blend-difference md:block"></div>
+
+<div id="grain" aria-hidden="true"
+     class="pointer-events-none fixed -inset-[120px] z-[155] opacity-[.16] mix-blend-overlay"></div>
+
+<p id="eyebrow"
+   class="fixed top-pad right-[calc(var(--spacing-pad)+52px)] z-[70] max-w-[46vw] text-right text-[11px] tracking-[.04em] text-haze"></p>
+
+<!-- theme toggle: dark by default, choice remembered in localStorage -->
+<button id="theme-toggle" data-cur aria-label="Switch to dark mode" aria-pressed="true"
+        class="fixed top-[calc(var(--spacing-pad)-9px)] right-pad z-[175] grid size-[34px] cursor-pointer place-items-center rounded-full border border-hair text-neon transition-colors duration-500 ease-expo hover:bg-neon hover:text-ink">
+  <svg viewBox="0 0 24 24" class="size-[15px]" fill="none" stroke="currentColor"
+       stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <path id="ic-moon" class="hidden" d="M20.2 14.6A8.6 8.6 0 0 1 9.4 3.8a8.6 8.6 0 1 0 10.8 10.8Z"/>
+    <g id="ic-sun">
+      <circle cx="12" cy="12" r="4.1"/>
+      <path d="M12 2.2v2.3M12 19.5v2.3M2.2 12h2.3M19.5 12h2.3M5.1 5.1l1.6 1.6M17.3 17.3l1.6 1.6M18.9 5.1l-1.6 1.6M6.7 17.3l-1.6 1.6"/>
+    </g>
+  </svg>
+</button>
+
+<div class="pointer-events-none fixed inset-x-0 bottom-0 z-[170] flex h-bar items-center justify-between px-pad">
+  <a href="#hero" data-cur aria-label="Sage X Limited — back to top"
+     class="group pointer-events-auto relative block size-[19px] border-[1.5px] border-neon transition-transform duration-500 ease-expo hover:rotate-90">
+    <span class="absolute inset-[4px] bg-neon opacity-0 transition-opacity duration-300 group-hover:opacity-100"></span>
+  </a>
+  <button id="burger" data-cur aria-label="Open menu" aria-expanded="false"
+          class="pointer-events-auto relative block h-4 w-[26px] cursor-pointer">
+    <i class="absolute top-[3px] left-0 block h-[1.5px] w-full bg-neon transition-transform duration-500 ease-expo"></i>
+    <i class="absolute bottom-[3px] left-0 block h-[1.5px] w-2/3 bg-neon transition-all duration-500 ease-expo"></i>
+  </button>
+</div>
+<div id="prog" class="fixed bottom-0 left-0 z-[171] h-px w-0 bg-neon opacity-50"></div>
+
+<nav id="menu" aria-hidden="true"
+     class="invisible fixed inset-0 z-[150] flex flex-col justify-center overflow-y-auto bg-ink px-pad pt-pad pb-[calc(var(--spacing-bar)+var(--spacing-pad))]">
+  <div>
+    <a href="#hero"     data-cur class="block overflow-hidden font-display text-[clamp(30px,7.4vw,86px)] leading-[1.03] uppercase"><em class="slice block not-italic" data-text="Home">Home</em></a>
+    <a href="#about"    data-cur class="block overflow-hidden font-display text-[clamp(30px,7.4vw,86px)] leading-[1.03] uppercase"><em class="slice block not-italic" data-text="Studio">Studio</em></a>
+    <a href="#work"     data-cur class="block overflow-hidden font-display text-[clamp(30px,7.4vw,86px)] leading-[1.03] uppercase"><em class="slice block not-italic" data-text="Work">Work</em></a>
+    <a href="#approach" data-cur class="block overflow-hidden font-display text-[clamp(30px,7.4vw,86px)] leading-[1.03] uppercase"><em class="slice block not-italic" data-text="Approach">Approach</em></a>
+    <a href="#services" data-cur class="block overflow-hidden font-display text-[clamp(30px,7.4vw,86px)] leading-[1.03] uppercase"><em class="slice block not-italic" data-text="Services">Services</em></a>
+    <a href="#contact"  data-cur class="block overflow-hidden font-display text-[clamp(30px,7.4vw,86px)] leading-[1.03] uppercase"><em class="slice block not-italic" data-text="Contact">Contact</em></a>
+  </div>
+  <div class="absolute inset-x-pad bottom-[calc(var(--spacing-bar)+4px)] flex flex-wrap justify-between gap-4 text-[10.5px] tracking-[.12em] text-haze uppercase">
+    <span>Port Harcourt, NG</span>
+    <a href="mailto:hello@sagex.dev" data-cur>hello@sagex.dev</a>
+  </div>
+</nav>
+
+<!-- ===== ScrollSmoother rig ===== -->
+<div id="smooth-wrapper">
+<div id="smooth-content">
+<main>
+
+  <!-- ================= HERO ================= -->
+  <section id="hero" data-label=""
+           class="relative flex min-h-svh flex-col justify-center overflow-hidden bg-ink px-pad pb-strip">
+
+    <div class="relative z-[3] w-full">
+      <!-- inline-block shrinks to the wordmark's width, so the eyebrow right-aligns under "Limited" -->
+      <div class="inline-block max-w-full">
+        <h1 id="hero-title"
+            class="-ml-[.045em] font-display text-hero leading-[.88] tracking-[-.01em] uppercase">Sage X Limited</h1>
+        <p id="hero-eyebrow"
+           class="mt-[clamp(6px,1.2vh,16px)] text-right text-eyebrow font-normal tracking-[-.01em] text-neon/90">
+          Creative Product Engineering &amp; ADs
+        </p>
+      </div>
+    </div>
+
+    <!-- parallax cut: oversized plate, no carousel, no horizontal scroll -->
+    <div class="absolute inset-x-0 bottom-0 z-[2] h-strip overflow-hidden border-t border-hair bg-ink" aria-hidden="true">
+      <!-- drop the opacity class to 0 (or delete this div) if you want the strip dead black -->
+      <div class="noise-plate absolute -inset-y-[55%] inset-x-0 opacity-[.1]" data-speed="0.72">
+        <svg preserveAspectRatio="xMidYMid slice" class="size-full"><rect width="100%" height="100%" filter="url(#fx5)"/></svg>
+      </div>
+      <span class="scrim-diag-hard pointer-events-none absolute inset-0"></span>
+    </div>
+  </section>
+
+  <!-- ================= ABOUT (ripple parallax panel) ================= -->
+  <section id="about" data-label="Studio"
+           class="relative flex min-h-svh flex-col justify-center overflow-hidden px-pad pt-[calc(var(--spacing-pad)+34px)] pb-[calc(var(--spacing-bar)+var(--spacing-pad))]">
+
+    <div class="tex"><svg preserveAspectRatio="xMidYMid slice"><rect width="100%" height="100%" filter="url(#fx5)"/></svg></div>
+
+    <div class="absolute -inset-y-[18%] inset-x-0 z-0" data-speed="0.78">
+      <!-- shows through whenever the WebGL2 canvas can't run (older iOS/Android) -->
+      <img src="bg1.jpg" alt="" aria-hidden="true" decoding="async"
+           class="ripple-fallback absolute inset-0 z-0 size-full object-cover">
+      <canvas class="relative z-[1] block size-full" data-ripple></canvas>
+    </div>
+
+    <span aria-hidden="true"
+          class="scrim-diag pointer-events-none absolute inset-0 z-[1]"></span>
+    <span aria-hidden="true"
+          class="scrim-h pointer-events-none absolute inset-0 z-[1]"></span>
+
+    <div class="relative z-[3] w-full max-w-[1100px]">
+      <!-- <p data-up class="text-kick font-normal tracking-[-.005em] text-neon">We work out of Port Harcourt, Nigeria</p> -->
+      <h2 data-split class="mt-5 font-display text-sec leading-[.95] uppercase">Software that stays up</h2>
+      <p data-up class="mt-5 text-sub font-normal text-neon">Since 2024</p>
+
+      <p data-up class="mt-8 max-w-[58ch] text-[14px] leading-[1.9] text-neon/65">
+       Sage X Limited is a creative marketting and product engineering studio. We take products from a rough idea to something people open every day, web platforms, mobile apps, and the services behind them. We work in small teams, ship in short cycles, and stay on after launch. we also offer ads and marketting services. we run ads that convert.
+      </p>
+
+      <div data-up class="mt-14 flex flex-wrap items-stretch justify-center gap-0">
+        <span class="w-px self-stretch bg-neon/40"></span>
+        <a href="#work" data-cur class="px-9 py-3 text-[11.5px] tracking-[.16em] uppercase transition-opacity duration-300 hover:opacity-60">See our selected work</a>
+        <span class="w-px self-stretch bg-neon/40"></span>
+        <span class="ml-px w-px self-stretch bg-neon/40"></span>
+        <a href="#approach" data-cur class="px-9 py-3 text-[11.5px] tracking-[.16em] uppercase transition-opacity duration-300 hover:opacity-60">See more about us</a>
+        <span class="w-px self-stretch bg-neon/40"></span>
+      </div>
+
+      <p class="mt-10 text-center text-[11.5px] tracking-[.04em] text-neon/35">© Concrete Study — texture by Sage X</p>
+    </div>
+
+   
+  </section>
+
+  <!-- ================= WORK ================= -->
+  <section id="work" data-label="Selected work"
+           class="relative flex min-h-svh flex-col justify-center overflow-hidden px-pad pt-[calc(var(--spacing-pad)+34px)] pb-[calc(var(--spacing-bar)+var(--spacing-pad))]">
+    <span class="absolute top-pad left-pad z-[5] text-[11px] tracking-[.14em] text-haze uppercase">Selected work</span>
+    <div class="tex opacity-[.22]"><svg preserveAspectRatio="xMidYMid slice"><rect width="100%" height="100%" filter="url(#fx3)"/></svg></div>
+    <div class="shade"></div>
+
+    <div class="relative z-[3] w-full">
+      <div class="mx-auto grid w-full max-w-[1240px] lg:grid-cols-[.9fr_1.1fr] lg:items-stretch">
+        <div class="pb-8 lg:flex lg:flex-col lg:justify-center lg:py-2 lg:pr-12 lg:pb-2">
+          <h3 data-split class="font-display text-sm2 leading-[.95] uppercase">Pages — commerce platform</h3>
+          <p data-up class="mt-3.5 max-w-[52ch] text-[13.5px] leading-[1.85] text-neon/65">A storefront and back office in one Next.js app — catalogue, cart, checkout, and order fulfilment, with inventory that stays honest under concurrent buys. Server-rendered product pages, a typed data layer, and payments that reconcile against the ledger, not the webhook.</p>
+          <p data-up class="mt-3 text-[12px] tracking-[.05em] text-haze">Next.js · TypeScript · Postgres · Stripe</p>
+          <div data-up class="mt-7"><a href="https://www.shopwithpages.com" target="_blank" rel="noopener noreferrer" data-cur class="btn relative isolate inline-block overflow-hidden border border-hair px-[22px] py-3 text-[10.5px] tracking-[.13em] uppercase"><span class="relative z-[2] transition-colors duration-500 ease-expo">See this project</span></a></div>
+        </div>
+        <div data-reveal class="plate relative min-h-[clamp(220px,42vh,440px)] overflow-hidden border border-hair">
+          <img src="pages.png" alt="Pages storefront — footwear catalogue home page with a promoted sneaker banner"
+               loading="lazy" decoding="async"
+               class="absolute inset-0 size-full object-cover object-left">
+          <span class="cap-fade absolute inset-x-0 bottom-0 z-[2] px-4 py-3.5 text-[10px] tracking-[.16em] uppercase"></span>
+        </div>
+      </div>
+
+      <div class="mx-auto mt-11 w-full max-w-[1240px] border-t border-hair">
+        <a href="https://mymently.com" target="_blank" rel="noopener noreferrer" data-cur data-up class="idx-row relative grid grid-cols-[auto_1fr_auto] items-baseline gap-4 border-b border-hair px-0.5 py-[15px] transition-[padding] duration-500 ease-expo hover:pl-4"><span class="w-[26px] text-[10px] tracking-[.1em] text-haze">02</span><span class="font-display text-[clamp(15px,2vw,25px)] leading-none uppercase">Mently</span><span class="text-right text-[10.5px] tracking-[.1em] text-haze uppercase">Learning · Next.js</span></a>
+        <a href="https://www.escobarbytheboss.com/" target="_blank" rel="noopener noreferrer" data-cur data-up class="idx-row relative grid grid-cols-[auto_1fr_auto] items-baseline gap-4 border-b border-hair px-0.5 py-[15px] transition-[padding] duration-500 ease-expo hover:pl-4"><span class="w-[26px] text-[10px] tracking-[.1em] text-haze">03</span><span class="font-display text-[clamp(15px,2vw,25px)] leading-none uppercase">Escobar</span><span class="text-right text-[10.5px] tracking-[.1em] text-haze uppercase">Lounge · Website</span></a>
+        <a href="https://creekngreek.com" target="_blank" rel="noopener noreferrer" data-cur data-up class="idx-row relative grid grid-cols-[auto_1fr_auto] items-baseline gap-4 border-b border-hair px-0.5 py-[15px] transition-[padding] duration-500 ease-expo hover:pl-4"><span class="w-[26px] text-[10px] tracking-[.1em] text-haze">04</span><span class="font-display text-[clamp(15px,2vw,25px)] leading-none uppercase">Creek n Greek</span><span class="text-right text-[10.5px] tracking-[.1em] text-haze uppercase">Lounge · Website</span></a>
+        <a href="https://signalface.com" target="_blank" rel="noopener noreferrer" data-cur data-up class="idx-row relative grid grid-cols-[auto_1fr_auto] items-baseline gap-4 border-b border-hair px-0.5 py-[15px] transition-[padding] duration-500 ease-expo hover:pl-4"><span class="w-[26px] text-[10px] tracking-[.1em] text-haze">05</span><span class="font-display text-[clamp(15px,2vw,25px)] leading-none uppercase">Signal Face</span><span class="text-right text-[10.5px] tracking-[.1em] text-haze uppercase">Social · NestJS</span></a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= APPROACH ================= -->
+  <section id="approach" data-label="Approach"
+           class="relative flex min-h-svh flex-col justify-center overflow-hidden px-pad pt-[calc(var(--spacing-pad)+34px)] pb-[calc(var(--spacing-bar)+var(--spacing-pad))]">
+    <div class="tex"><svg preserveAspectRatio="xMidYMid slice"><rect width="100%" height="100%" filter="url(#fx1)"/></svg></div>
+    <div class="shade"></div>
+    <div class="relative z-[3] w-full">
+      <p data-up class="mb-3.5 text-[12px] tracking-[.05em] text-haze">Shipping since 2024</p>
+      <h2 data-split class="font-display text-sec leading-[.92] uppercase">We build for the long run</h2>
+
+      <div class="mt-8 grid max-w-[1000px] gap-6 md:grid-cols-3 md:gap-10">
+        <div data-up class="border-t border-hair pt-4"><h4 class="mb-2 font-display text-[17px] uppercase">Clarity</h4><p class="text-[12.5px] leading-[1.8] text-neon/65">The plan should be readable by whoever is paying for it. Scope, cost, and risk in plain sentences before anyone opens an editor.</p></div>
+        <div data-up class="border-t border-hair pt-4"><h4 class="mb-2 font-display text-[17px] uppercase">Craft</h4><p class="text-[12.5px] leading-[1.8] text-neon/65">Migrations, logs, and error states get the same attention as the landing page. The parts nobody sees are the parts that wake you up.</p></div>
+        <div data-up class="border-t border-hair pt-4"><h4 class="mb-2 font-display text-[17px] uppercase">Continuity</h4><p class="text-[12.5px] leading-[1.8] text-neon/65">We stay on after launch. We maintain for 3 months after buidling.</p></div>
+      </div>
+
+      <div class="mt-8 grid max-w-[940px] grid-cols-2 gap-x-5 gap-y-6 md:grid-cols-4">
+        <div data-up class="border-t border-hair pt-3.5"><b class="block font-display text-[clamp(30px,4.4vw,54px)] leading-none font-normal"><span data-count="5" data-suffix="+">0</span></b><span class="text-[10.5px] tracking-[.11em] text-haze uppercase">Products shipped</span></div>
+        <div data-up class="border-t border-hair pt-3.5"><b class="block font-display text-[clamp(30px,4.4vw,54px)] leading-none font-normal"><span data-count="2">0</span></b><span class="text-[10.5px] tracking-[.11em] text-haze uppercase">Years running</span></div>
+        <div data-up class="border-t border-hair pt-3.5"><b class="block font-display text-[clamp(30px,4.4vw,54px)] leading-none font-normal"><span data-count="99.9" data-suffix="%">0</span></b><span class="text-[10.5px] tracking-[.11em] text-haze uppercase">Uptime, managed services</span></div>
+      
+      </div>
+    </div>
+     <a href="services.html">
+      <button data-cur aria-label="Next panel"
+            class="group absolute right-pad bottom-[calc(var(--spacing-bar)+6vh)] z-[3] flex cursor-pointer items-center gap-4">
+      <span class="grid size-[clamp(40px,3.6vw,52px)] place-items-center rounded-full border border-neon/40 text-[15px] transition-colors duration-500 ease-expo group-hover:bg-neon group-hover:text-ink">&rarr;</span>
+      <span class="hidden h-px w-[clamp(70px,10vw,190px)] bg-neon/40 md:block"></span>
+    </button>
+    </a>
+  </section>
+
+  <!-- ================= SERVICES ================= -->
+  <section id="services" data-label="Our services"
+           class="relative flex min-h-svh flex-col justify-center overflow-hidden px-pad pt-[calc(var(--spacing-pad)+34px)] pb-[calc(var(--spacing-bar)+var(--spacing-pad))]">
+    <span class="absolute top-pad left-pad z-[5] text-[11px] tracking-[.14em] text-haze uppercase">Our services</span>
+    <div class="tex opacity-20"><svg preserveAspectRatio="xMidYMid slice"><rect width="100%" height="100%" filter="url(#fx3)"/></svg></div>
+    <div class="shade"></div>
+    <div class="relative z-[3] mx-auto grid w-full max-w-[1180px] items-center gap-9 lg:grid-cols-[1.06fr_.94fr] lg:gap-14">
+      <div data-up class="mos w-full max-w-[760px]">
+        <!-- live HTML5 banner: real build, trackers stripped, inert to clicks -->
+        <div class="m1 ad-cell relative grid place-items-center overflow-hidden border border-hair bg-[#0c1a0a]" data-speed="1.06">
+          <iframe src="ads/mobile_300x600/index.html" title="Mobile — HTML5 display banner, 300x600"
+                  width="300" height="600" scrolling="no" tabindex="-1" loading="lazy"
+                  class="ad-frame pointer-events-none absolute top-1/2 left-1/2 block border-0"></iframe>
+          <!-- <span class="cap-fade pointer-events-none absolute inset-x-0 bottom-0 z-[2] px-2 py-1.5 text-center font-display text-mos leading-[1.05] uppercase">Mobile</span> -->
+        </div>
+        <!-- webapp showreel: muted/looping, only fetched + played while in view -->
+        <div class="m2 relative grid place-items-center overflow-hidden border border-hair bg-[#123a06] text-neon">
+          <video class="tile-video absolute inset-0 size-full object-cover" data-src="webapp-loop.mp4"
+                 poster="webapp-poster.png" muted loop playsinline preload="none"
+                 disablepictureinpicture aria-hidden="true" tabindex="-1"></video>
+          <!-- <span class="cap-fade pointer-events-none absolute inset-x-0 bottom-0 z-[2] px-2 py-1.5 text-center font-display text-mos leading-[1.05] uppercase">Web Apps</span> -->
+        </div>
+        <!-- live HTML5 banner: real build, trackers stripped, inert to clicks -->
+        <div class="m3 ad-cell relative grid place-items-center overflow-hidden border border-hair bg-plum text-neon" data-speed="0.94">
+          <iframe src="ads/samsung-watch-300x600/index.html" title="Samsung watch — HTML5 display banner, 300x600"
+                  width="300" height="600" scrolling="no" tabindex="-1" loading="lazy"
+                  class="ad-frame pointer-events-none absolute top-1/2 left-1/2 block border-0"></iframe>
+          <span class="cap-fade pointer-events-none absolute inset-x-0 bottom-0 z-[2] px-2 py-1.5 text-center font-display text-mos leading-[1.05] uppercase"></span>
+        </div>
+        <div class="m4 ad-cell relative grid place-items-center overflow-hidden border border-hair bg-[#1b4a10]" data-speed="1">
+          <iframe src="ads/ad_300x600/index.html" title="Rich media campaign — HTML5 display banner, 300x600"
+            width="300" height="600" scrolling="no" tabindex="-1" loading="lazy"
+            class="ad-frame pointer-events-none absolute top-1/2 left-1/2 block border-0"></iframe>
+        </div>
+        <div class="m5 ad-cell relative grid place-items-center overflow-hidden border border-hair bg-[#08210b]" data-speed="1">
+          <iframe src="ads/API_&_infra_300x600/index.html" title="API and infrastructure — HTML5 display banner, 300x250"
+            width="300" height="250" scrolling="no" tabindex="-1" loading="lazy"
+            class="ad-frame-250 pointer-events-none absolute top-1/2 left-1/2 block border-0"></iframe>
+        </div>
+        <div class="m6 relative grid place-items-center overflow-hidden border border-hair bg-[#070c07] p-2.5"><span class="relative z-[2] text-center font-display text-mos leading-[1.05] uppercase">Since&nbsp;2024</span></div>
+      </div>
+      <div>
+        <h3 data-split class="font-display text-sm2 leading-[.95] uppercase">What we do</h3>
+        <p data-up class="mt-4 max-w-[52ch] text-[13.5px] leading-[1.85] text-neon/65">Full-stack end to end solutions, taken on as a full build or picked up mid-flight.</p>
+
+        <div class="mt-6 grid gap-x-8 gap-y-5 sm:grid-cols-2">
+          <div data-up class="border-t border-hair pt-3"><h4 class="mb-1.5 font-display text-[15px] uppercase">Web platforms</h4><p class="text-[12.5px] leading-[1.75] text-neon/60">Web Apps: We build Store fronts, dashboards, Modern and user friendly User Interfaces.</p></div>
+          <div data-up class="border-t border-hair pt-3"><h4 class="mb-1.5 font-display text-[15px] uppercase">Mobile apps</h4><p class="text-[12.5px] leading-[1.75] text-neon/60">React Native and Expo: one codebase to both stores, with offline and retry states that hold.</p></div>
+          <div data-up class="border-t border-hair pt-3"><h4 class="mb-1.5 font-display text-[15px] uppercase">Backend &amp; infra</h4><p class="text-[12.5px] leading-[1.75] text-neon/60">APIs, databases, deploys, and the monitoring that tells you before your users do.</p></div>
+          <div data-up class="border-t border-hair pt-3"><h4 class="mb-1.5 font-display text-[15px] uppercase">Creative &amp; ads</h4><p class="text-[12.5px] leading-[1.75] text-neon/60">HTML5 display sets built to spec and weight budget, sized across every placement in the buy.</p></div>
+        </div>
+        <div data-up class="mt-7 flex flex-wrap items-center gap-x-7 gap-y-4">
+          <a href="#contact" data-cur class="btn relative isolate inline-block overflow-hidden border border-hair px-[22px] py-3 text-[10.5px] tracking-[.13em] uppercase"><span class="relative z-[2] transition-colors duration-500 ease-expo">Start a conversation</span></a>
+          <a href="services.html" data-cur class="group inline-flex items-center gap-2.5 text-[10.5px] tracking-[.13em] uppercase transition-opacity duration-300 hover:opacity-60">See full brochure<span class="inline-block transition-transform duration-500 ease-expo group-hover:translate-x-1.5">&rarr;</span></a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= CONTACT ================= -->
+  <section id="contact" data-label="Contact"
+           class="relative flex min-h-svh flex-col items-center justify-center overflow-hidden px-pad pt-[calc(var(--spacing-pad)+34px)] pb-[calc(var(--spacing-bar)+var(--spacing-pad))] text-center">
+    <div class="tex opacity-[.14]"><svg preserveAspectRatio="xMidYMid slice"><rect width="100%" height="100%" filter="url(#fx2)"/></svg></div>
+    <div class="shade"></div>
+    <div class="relative z-[3] w-full">
+      <h2 data-split class="font-display text-sec leading-[.92] uppercase">Contact</h2>
+      <p data-up class="mx-auto mt-4.5 max-w-[38ch] text-[13.5px] leading-[1.85] text-neon/65">Tell us what you're building and where it's stuck. We reply within a working day.</p>
+      <a href="mailto:sagex.limite@gmail.com" data-cur data-up class="mt-2 inline-block font-display text-[clamp(18px,3vw,38px)] uppercase">sagex.limited@gmail.com</a>
+      <p data-up class="mt-3 text-[12px] tracking-[.05em] text-haze">Aba Road, Port Harcourt · Rivers State, Nigeria</p>
+      <div class="mt-6 flex flex-wrap justify-center gap-5.5">
+        <a href="#" data-cur data-up class="text-[11px] tracking-[.13em] text-haze uppercase hover:text-neon">GitHub</a>
+        <a href="#" data-cur data-up class="text-[11px] tracking-[.13em] text-haze uppercase hover:text-neon">LinkedIn</a>
+        <a href="#" data-cur data-up class="text-[11px] tracking-[.13em] text-haze uppercase hover:text-neon">Dribbble</a>
+        <a href="#" data-cur data-up class="text-[11px] tracking-[.13em] text-haze uppercase hover:text-neon">X</a>
+      </div>
+      <p data-up class="mt-13 text-[9.5px] tracking-[.13em] text-neon/30 uppercase">© 2026 Sage X Limited — Software engineering studio</p>
+    </div>
+  </section>
+
+</main>
+</div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.15/dist/gsap.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.15/dist/ScrollTrigger.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.15/dist/ScrollSmoother.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.15/dist/SplitText.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.15/dist/MotionPathPlugin.min.js"></script>
+<script>
+(function () {
+  "use strict";
+
+  var loaderEl = document.getElementById('loader');
+
+  /* ---------- theme ----------
+     Runs before the GSAP guard so the toggle still works without animation.
+     LIGHT is read by the ripple shader on its next frame. */
+  var LIGHT = 0;
+  (function theme() {
+    var root = document.documentElement,
+        btn  = document.getElementById('theme-toggle'),
+        moon = document.getElementById('ic-moon'),
+        sun  = document.getElementById('ic-sun');
+    if (!btn) return;
+
+    function paint(mode) {
+      var light = mode === 'light';
+      root.setAttribute('data-theme', mode);
+      btn.setAttribute('aria-pressed', String(light));
+      btn.setAttribute('aria-label', light ? 'Switch to dark mode' : 'Switch to light mode');
+      moon.classList.toggle('hidden', light);
+      sun.classList.toggle('hidden', !light);
+      LIGHT = light ? 1 : 0;
+    }
+
+    paint(root.getAttribute('data-theme') === 'dark' ? 'dark' : 'light');
+
+    btn.addEventListener('click', function () {
+      var next = root.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
+      try { localStorage.setItem('sagex-theme', next); } catch (e) {}
+      paint(next);
+    });
+  })();
+
+  if (!window.gsap) {
+    if (loaderEl) loaderEl.remove();
+    document.querySelectorAll('[data-up]').forEach(function (n) { n.style.opacity = 1; });
+    return;
+  }
+
+  var plugins = [ScrollTrigger];
+  if (window.ScrollSmoother)    plugins.push(ScrollSmoother);
+  if (window.SplitText)         plugins.push(SplitText);
+  if (window.MotionPathPlugin)  plugins.push(MotionPathPlugin);
+  gsap.registerPlugin.apply(gsap, plugins);
+
+  var HAS_MP   = !!window.MotionPathPlugin;
+  var REDUCE   = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var smoother = null;
+
+  /* ---------- generated grain ---------- */
+  (function grain() {
+    var c = document.createElement('canvas'); c.width = c.height = 160;
+    var x = c.getContext('2d'), d = x.createImageData(160, 160), p = d.data;
+    for (var i = 0; i < p.length; i += 4) {
+      var v = (Math.random() * 255) | 0;
+      p[i] = p[i + 1] = p[i + 2] = v; p[i + 3] = 255;
+    }
+    x.putImageData(d, 0, 0);
+    document.documentElement.style.setProperty('--noise', 'url(' + c.toDataURL() + ')');
+  })();
+
+  /* ---------- embedded banner: make the cell match the creative exactly ----------
+     The 2x2 cell is (2c + gap) wide and (2r + gap) tall. Solving 2r+gap = 2(2c+gap)
+     for the banner's 1:2 ratio gives r = 2c + gap/2 — so the row height follows the
+     column width and the cell is always 300:600. Then scale = cellW / 300 fills it
+     edge to edge with nothing cropped. */
+  (function adFit() {
+    var frames = document.querySelectorAll('.ad-frame');
+    var frames250 = document.querySelectorAll('.ad-frame-250');
+    if (!frames.length && !frames250.length) return;
+
+    var GAP = 5, COLS = 6;
+
+    function fit(frame) {
+      var cell = frame.parentElement,
+          mos  = cell.closest('.mos'),
+          ratio = frame.height / frame.width;          // 600/300 = 2
+
+      if (mos) {
+        var c = (mos.clientWidth - (COLS - 1) * GAP) / COLS;
+        mos.style.setProperty('--mos-row', (ratio * c + (ratio - 1) * GAP / 2).toFixed(2) + 'px');
+      }
+
+      var w = cell.clientWidth;
+      if (w) frame.style.setProperty('--adk', (w / frame.width).toFixed(4));
+    }
+
+    function fit250(frame) {
+      var w = frame.parentElement.clientWidth;
+      if (w) frame.style.setProperty('--adk250', (w / frame.width).toFixed(4));
+    }
+
+    frames.forEach(fit);
+    frames250.forEach(fit250);
+
+    if (window.ResizeObserver) {
+      var ro = new ResizeObserver(function (entries) {
+        entries.forEach(function (e) {
+          var f = e.target.querySelector('.ad-frame');
+          if (f) fit(f);
+          var f250 = e.target.querySelector('.ad-frame-250');
+          if (f250) fit250(f250);
+        });
+      });
+      frames.forEach(function (f) { ro.observe(f.parentElement.closest('.mos') || f.parentElement); });
+      frames250.forEach(function (f) { ro.observe(f.parentElement); });
+    } else {
+      window.addEventListener('resize', function () {
+        frames.forEach(fit);
+        frames250.forEach(fit250);
+      });
+    }
+  })();
+
+  /* ---------- tile video: fetch and play only while it's on screen ----------
+     preload="none" + a data-src means nothing downloads until the tile scrolls
+     close, and playback pauses when it leaves so it isn't decoding off-screen.
+     Reduced-motion keeps the poster frame and never loads the video at all. */
+  (function tileVideo() {
+    var vids = document.querySelectorAll('.tile-video');
+    if (!vids.length) return;
+
+    if (REDUCE || !('IntersectionObserver' in window)) return;   // poster only
+
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        var v = e.target;
+        if (e.isIntersecting) {
+          if (!v.src && v.dataset.src) v.src = v.dataset.src;
+          var p = v.play();
+          if (p && p.catch) p.catch(function () {});             // autoplay refused: poster stays
+        } else if (!v.paused) {
+          v.pause();
+        }
+      });
+    }, { rootMargin: '200px 0px' });
+
+    vids.forEach(function (v) { io.observe(v); });
+  })();
+
+  /* ---------- 4-column wipe ---------- */
+  var TILE_COLS = 4;
+  var wipe = document.getElementById('wipe');
+  wipe.innerHTML = new Array(TILE_COLS + 1).join('<span></span>');
+  var TILES = gsap.utils.toArray('#wipe span');
+
+  function wipeTl(color) {
+    return gsap.timeline()
+      .set(wipe, { visibility: 'visible', autoAlpha: 1 })
+      .set(TILES, { backgroundColor: color, transformOrigin: 'top', scaleY: 0 })
+      .to(TILES, {
+        scaleY: 1, duration: .52, ease: 'power3.inOut',
+        stagger: { amount: .28, grid: [1, TILE_COLS], from: 'random' }
+      });
+  }
+  function unwipeTl() {
+    return gsap.timeline()
+      .set(TILES, { transformOrigin: 'bottom' })
+      .to(TILES, {
+        scaleY: 0, duration: .5, ease: 'power3.inOut',
+        stagger: { amount: .26, grid: [1, TILE_COLS], from: 'random' }
+      })
+      .set(wipe, { visibility: 'hidden' });
+  }
+
+  /* ---------- ScrollSmoother ---------- */
+  if (window.ScrollSmoother) {
+    gsap.matchMedia().add('(min-width: 861px) and (prefers-reduced-motion: no-preference)', function () {
+      smoother = ScrollSmoother.create({
+        wrapper: '#smooth-wrapper', content: '#smooth-content',
+        smooth: 1.15, effects: true, smoothTouch: 0
+      });
+      return function () { smoother = null; };
+    });
+  }
+
+  /* ---------------------------------------------------------
+     Loader mark: a tracer node runs the letterforms with
+     MotionPath while the stroke draws in behind it.
+     --------------------------------------------------------- */
+  var SEGS   = gsap.utils.toArray('#mark .ln');
+  var TRACER = document.getElementById('tracer');
+  var SPEED  = 1050;   // path px per second — one constant speed for every stroke
+
+  function primeMark() {
+    SEGS.forEach(function (p) {
+      var len = p.getTotalLength();
+      p.__len = len;
+      gsap.set(p, { visibility: 'visible', strokeDasharray: len + ' ' + len, strokeDashoffset: len });
+    });
+    gsap.set(TRACER, { visibility: 'visible', autoAlpha: 0, scale: .3, transformOrigin: '50% 50%' });
+  }
+
+  function markTl() {
+    var tl = gsap.timeline(), at = 0;
+
+    tl.to(TRACER, { autoAlpha: 1, scale: 1, duration: .26, ease: 'expo.out' }, 0);
+    at = .12;
+
+    SEGS.forEach(function (p) {
+      var d = Math.max(.14, p.__len / SPEED);
+
+      if (HAS_MP) {
+        tl.to(TRACER, {
+          duration: d, ease: 'none',
+          motionPath: { path: p, align: p, alignOrigin: [.5, .5], autoRotate: true }
+        }, at);
+      }
+      tl.to(p, { strokeDashoffset: 0, duration: d, ease: 'none' }, at);
+
+      at += d - .045;     // letters overlap slightly so the run never stalls
+    });
+
+    tl.to(TRACER, { autoAlpha: 0, scale: 2.6, duration: .4, ease: 'expo.out' }, at)
+      .to('#mark-lines', { strokeWidth: 15, duration: .16, ease: 'power2.out' }, at)
+      .to('#mark-lines', { strokeWidth: 11, duration: .6, ease: 'expo.out' }, at + .16);
+
+    return tl;
+  }
+
+  /* ---------- SplitText headings ---------- */
+  var heroChars = null;
+
+  function buildSplits() {
+    if (!window.SplitText) return;
+
+    SplitText.create('#hero-title', {
+      type: 'chars,words', mask: 'chars', charsClass: 'ch', autoSplit: true,
+      onSplit: function (self) {
+        heroChars = self.chars;
+        gsap.set(self.chars, { yPercent: 110 });
+        return null;
+      }
+    });
+
+    gsap.utils.toArray('[data-split]').forEach(function (el) {
+      SplitText.create(el, {
+        type: 'chars,words', mask: 'chars', charsClass: 'ch', autoSplit: true,
+        onSplit: function (self) {
+          return gsap.from(self.chars, {
+            yPercent: 110, duration: .85, ease: 'expo.out',
+            stagger: { amount: .5, from: 'random' },
+            scrollTrigger: { trigger: el, start: 'top 85%', once: true }
+          });
+        }
+      });
+    });
+  }
+
+  /* ---------- scroll work ---------- */
+  function buildScroll() {
+    gsap.set('[data-up]', { opacity: 0, y: 26 });
+    ScrollTrigger.batch('[data-up]', {
+      start: 'top 88%', once: true,
+      onEnter: function (b) { gsap.to(b, { opacity: 1, y: 0, duration: .9, ease: 'expo.out', stagger: .08 }); }
+    });
+
+    gsap.utils.toArray('[data-reveal]').forEach(function (el) {
+      gsap.fromTo(el, { clipPath: 'inset(0 0 100% 0)' },
+        { clipPath: 'inset(0 0 0% 0)', duration: 1.2, ease: 'expo.out',
+          scrollTrigger: { trigger: el, start: 'top 85%', once: true } });
+    });
+
+    gsap.utils.toArray('[data-count]').forEach(function (el) {
+      var end = parseFloat(el.dataset.count), suf = el.dataset.suffix || '', dec = end % 1 !== 0;
+      var o = { v: 0 };
+      gsap.to(o, {
+        v: end, duration: 1.6, ease: 'power2.out',
+        scrollTrigger: { trigger: el, start: 'top 90%', once: true },
+        onUpdate: function () { el.textContent = (dec ? o.v.toFixed(1) : Math.round(o.v)) + suf; }
+      });
+    });
+
+    gsap.to('#prog', { width: '100%', ease: 'none', scrollTrigger: { start: 0, end: 'max', scrub: .3 } });
+
+    var eyebrow = document.getElementById('eyebrow');
+    function setLabel(txt) {
+      if (eyebrow.textContent === txt) return;
+      gsap.killTweensOf(eyebrow);
+      gsap.timeline()
+        .to(eyebrow, { autoAlpha: 0, duration: .22, ease: 'power2.in' })
+        .set(eyebrow, { text: txt })
+        .to(eyebrow, { autoAlpha: txt ? 1 : 0, duration: .3, ease: 'power2.out' });
+    }
+    gsap.utils.toArray('section[data-label]').forEach(function (sec) {
+      ScrollTrigger.create({
+        trigger: sec, start: 'top 45%', end: 'bottom 45%',
+        onEnter:     function () { setLabel(sec.dataset.label); },
+        onEnterBack: function () { setLabel(sec.dataset.label); }
+      });
+    });
+
+    /* The column rules are one fixed viewport-wide overlay, so they can't be
+       switched off per section in CSS — fade them out while Services is the
+       section on screen, and back in for every other one. */
+    var services = document.getElementById('services');
+    if (services) {
+      ScrollTrigger.create({
+        trigger: services, start: 'top 60%', end: 'bottom 40%',
+        onToggle: function (self) { document.documentElement.classList.toggle('no-rules', self.isActive); }
+      });
+    }
+  }
+
+  /* ---------------------------------------------------------
+     Water-ripple displacement (WebGL2 ping-pong height field)
+     --------------------------------------------------------- */
+  function initRipple(canvas) {
+    var gl = canvas.getContext('webgl2', { antialias: false, alpha: false, depth: false });
+    // The ping-pong targets are RGBA16F/HALF_FLOAT, so half-float support is all
+    // that's actually required. iOS Safari ships EXT_color_buffer_half_float but
+    // not EXT_color_buffer_float — gating on the latter alone killed the effect
+    // on every iPhone.
+    if (!gl) return null;
+    if (!gl.getExtension('EXT_color_buffer_float') &&
+        !gl.getExtension('EXT_color_buffer_half_float')) return null;
+
+    var VERT = '#version 300 es\nin vec2 p;out vec2 vUv;void main(){vUv=p*0.5+0.5;gl_Position=vec4(p,0.,1.);}';
+
+    var SIM =
+      '#version 300 es\nprecision highp float;in vec2 vUv;out vec4 o;' +
+      'uniform sampler2D uPrev;uniform vec2 uTexel,uMouse,uAspect;' +
+      'uniform float uStrength,uRadius,uDamp;' +
+      'void main(){vec4 s=texture(uPrev,vUv);' +
+      'float sum=texture(uPrev,vUv+vec2(uTexel.x,0.)).r+texture(uPrev,vUv-vec2(uTexel.x,0.)).r' +
+      '+texture(uPrev,vUv+vec2(0.,uTexel.y)).r+texture(uPrev,vUv-vec2(0.,uTexel.y)).r;' +
+      'float h=(sum*0.5-s.g)*uDamp;' +
+      'h+=smoothstep(uRadius,0.,distance((vUv-uMouse)*uAspect,vec2(0.)))*uStrength;' +
+      'o=vec4(h,s.r,0.,1.);}';
+
+  var DRAW =
+  '#version 300 es\nprecision highp float;in vec2 vUv;out vec4 o;' +
+  'uniform sampler2D uSim,uImg;uniform vec2 uTexel,uCover,uOff;uniform float uRefract,uLight;' +
+  'void main(){' +
+  'float l=texture(uSim,vUv-vec2(uTexel.x,0.)).r,r=texture(uSim,vUv+vec2(uTexel.x,0.)).r;' +
+  'float b=texture(uSim,vUv-vec2(0.,uTexel.y)).r,t=texture(uSim,vUv+vec2(0.,uTexel.y)).r;' +
+  'vec2 g=vec2(r-l,t-b);' +
+  'vec3 c=texture(uImg,vUv*uCover+uOff+g*uRefract).rgb;' +
+  'c += (g.x + g.y) * 0.12;' +
+  'float lum = dot(c, vec3(0.2126, 0.7152, 0.0722));' +
+  'c = mix(c, vec3(lum), 0.08);' +
+  'c = mix(c, vec3(1.0), 0.06);' +
+  'c *= 1.08;' +
+  // light theme: lift the dark photo into a bright range instead of washing it out.
+  // pow() expands the shadows so the cloud structure survives, and scaling by the
+  // target luminance keeps the original hue rather than going flat grey.
+  'float e = 0.05 + pow(clamp(lum, 0.0, 1.0), 0.45) * 0.66;' +
+  'vec3 lt = clamp(c * (e / max(lum, 0.02)), 0.0, 1.0);' +
+  'lt = mix(vec3(e), lt, 0.7);' +
+  'c = mix(c, lt, uLight);' +
+  'o=vec4(c,1.);}';
+
+    function sh(type, src) {
+      var s = gl.createShader(type); gl.shaderSource(s, src); gl.compileShader(s);
+      if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) { console.warn(gl.getShaderInfoLog(s)); return null; }
+      return s;
+    }
+    function prog(fs) {
+      var p = gl.createProgram(), a = sh(gl.VERTEX_SHADER, VERT), b = sh(gl.FRAGMENT_SHADER, fs);
+      if (!a || !b) return null;
+      gl.attachShader(p, a); gl.attachShader(p, b); gl.bindAttribLocation(p, 0, 'p'); gl.linkProgram(p);
+      return gl.getProgramParameter(p, gl.LINK_STATUS) ? p : null;
+    }
+
+    var pSim = prog(SIM), pDraw = prog(DRAW);
+    if (!pSim || !pDraw) return null;
+
+    var vao = gl.createVertexArray(); gl.bindVertexArray(vao);
+    gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer());
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1, 3,-1, -1,3]), gl.STATIC_DRAW);
+    gl.enableVertexAttribArray(0); gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 0, 0);
+
+    function target(w, h) {
+      var t = gl.createTexture();
+      gl.bindTexture(gl.TEXTURE_2D, t);
+      gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA16F, w, h, 0, gl.RGBA, gl.HALF_FLOAT, null);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+      var f = gl.createFramebuffer();
+      gl.bindFramebuffer(gl.FRAMEBUFFER, f);
+      gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, t, 0);
+      gl.clearColor(0, 0, 0, 1); gl.clear(gl.COLOR_BUFFER_BIT);
+      return { tex: t, fbo: f };
+    }
+
+    var img = new Image(), imgTex = gl.createTexture(), ready = false, imgAspect = 1.5;
+    var svg =
+      '<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="900">' +
+      '<filter id="g"><feTurbulence type="fractalNoise" baseFrequency="0.004 0.009" numOctaves="5" seed="19"/>' +
+      '<feColorMatrix type="saturate" values="0"/><feComponentTransfer>' +
+      '<feFuncR type="table" tableValues="0 .05 .72 .2 1 .34 .95"/>' +
+      '<feFuncG type="table" tableValues="0 .05 .72 .2 1 .34 .95"/>' +
+      '<feFuncB type="table" tableValues="0 .06 .74 .22 1 .36 .97"/>' +
+      '</feComponentTransfer></filter>' +
+      '<rect width="100%" height="100%" fill="#050705"/>' +
+      '<rect width="100%" height="100%" filter="url(#g)"/></svg>';
+    img.onload = function () {
+      imgAspect = img.width / img.height;
+      gl.bindTexture(gl.TEXTURE_2D, imgTex);
+      gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+      gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, img);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+      ready = true; layout();
+    };
+    var fallbackSrc = 'data:image/svg+xml;base64,' + btoa(svg);
+    img.onerror = function () { if (img.src !== fallbackSrc) img.src = fallbackSrc; };  // procedural plate if the photo can't load
+    img.crossOrigin = 'anonymous';
+    img.src = 'bg1.jpg';
+
+    var A, B, W = 0, H = 0, SW = 0, SH = 0, cover = [1, 1], off = [0, 0];
+    var m = { x: .5, y: .5, tx: .5, ty: .5, on: false };
+
+    function layout() {
+      var r = canvas.getBoundingClientRect();
+      if (!r.width || !r.height) return;
+      var dpr = Math.min(devicePixelRatio || 1, 1.75);
+      W = canvas.width  = Math.round(r.width * dpr);
+      H = canvas.height = Math.round(r.height * dpr);
+      SW = Math.max(2, Math.round(W * .5));
+      SH = Math.max(2, Math.round(H * .5));
+      A = target(SW, SH); B = target(SW, SH);
+
+      var ca = r.width / r.height;
+      if (ca > imgAspect) { cover = [1, imgAspect / ca]; off = [0, (1 - cover[1]) * .5]; }
+      else                { cover = [ca / imgAspect, 1]; off = [(1 - cover[0]) * .5, 0]; }
+    }
+
+    var host = canvas.closest('section');
+    host.addEventListener('pointermove', function (e) {
+      var r = canvas.getBoundingClientRect();
+      m.tx = (e.clientX - r.left) / r.width;
+      m.ty = 1 - (e.clientY - r.top) / r.height;
+      m.on = true;
+    });
+    host.addEventListener('pointerleave', function () { m.on = false; });
+
+    function frame() {
+      if (!ready || !A) return;
+      m.x += (m.tx - m.x) * .28;
+      m.y += (m.ty - m.y) * .28;
+
+      gl.bindVertexArray(vao);
+      gl.viewport(0, 0, SW, SH);
+      gl.bindFramebuffer(gl.FRAMEBUFFER, B.fbo);
+      gl.useProgram(pSim);
+      gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, A.tex);
+      gl.uniform1i(gl.getUniformLocation(pSim, 'uPrev'), 0);
+      gl.uniform2f(gl.getUniformLocation(pSim, 'uTexel'), 1 / SW, 1 / SH);
+      gl.uniform2f(gl.getUniformLocation(pSim, 'uMouse'), m.x, m.y);
+      gl.uniform2f(gl.getUniformLocation(pSim, 'uAspect'), SW / SH, 1);
+      gl.uniform1f(gl.getUniformLocation(pSim, 'uStrength'), m.on ? .055 : 0);
+      gl.uniform1f(gl.getUniformLocation(pSim, 'uRadius'), .055);
+      gl.uniform1f(gl.getUniformLocation(pSim, 'uDamp'), .9865);
+      gl.drawArrays(gl.TRIANGLES, 0, 3);
+
+      var t = A; A = B; B = t;
+
+      gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+      gl.viewport(0, 0, W, H);
+      gl.useProgram(pDraw);
+      gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, A.tex);
+      gl.uniform1i(gl.getUniformLocation(pDraw, 'uSim'), 0);
+      gl.activeTexture(gl.TEXTURE1); gl.bindTexture(gl.TEXTURE_2D, imgTex);
+      gl.uniform1i(gl.getUniformLocation(pDraw, 'uImg'), 1);
+      gl.uniform2f(gl.getUniformLocation(pDraw, 'uTexel'), 1 / SW, 1 / SH);
+      gl.uniform2f(gl.getUniformLocation(pDraw, 'uCover'), cover[0], cover[1]);
+      gl.uniform2f(gl.getUniformLocation(pDraw, 'uOff'), off[0], off[1]);
+      gl.uniform1f(gl.getUniformLocation(pDraw, 'uRefract'), .42);
+      gl.uniform1f(gl.getUniformLocation(pDraw, 'uLight'), LIGHT);
+      gl.drawArrays(gl.TRIANGLES, 0, 3);
+    }
+
+    layout();
+    return { frame: frame, layout: layout, live: false };
+  }
+
+  gsap.matchMedia().add('(min-width: 861px) and (prefers-reduced-motion: no-preference)', function () {
+    var ripples = [];
+    gsap.utils.toArray('[data-ripple]').forEach(function (c) {
+      var r = initRipple(c);
+      if (!r) { c.style.display = 'none'; return; }   // no WebGL2 → the .tex plate shows through
+      ripples.push(r);
+      ScrollTrigger.create({
+        trigger: c.closest('section'), start: 'top bottom', end: 'bottom top',
+        onToggle: function (self) { r.live = self.isActive; }
+      });
+    });
+    if (!ripples.length) return;
+
+    var tick = function () { ripples.forEach(function (r) { if (r.live) r.frame(); }); };
+    gsap.ticker.add(tick);
+    var onResize = function () { ripples.forEach(function (r) { r.layout(); }); };
+    window.addEventListener('resize', onResize);
+
+    return function () {
+      gsap.ticker.remove(tick);
+      window.removeEventListener('resize', onResize);
+    };
+  });
+
+  /* ---------- menu ---------- */
+  var burger = document.getElementById('burger');
+  var menu   = document.getElementById('menu');
+  var links  = gsap.utils.toArray('#menu a em');
+  var open = false, busy = false;
+
+  gsap.set(links, { yPercent: 110 });
+
+  function toggleMenu(next) {
+    if (busy || next === open) return;
+    busy = true; open = next;
+    burger.setAttribute('aria-expanded', String(open));
+    menu.setAttribute('aria-hidden', String(!open));
+    burger.children[0].style.transform = open ? 'translateY(4.5px) rotate(45deg)' : '';
+    burger.children[1].style.width     = open ? '100%' : '';
+    burger.children[1].style.transform = open ? 'translateY(-4.5px) rotate(-45deg)' : '';
+
+    gsap.timeline({ onComplete: function () { busy = false; } })
+      .add(wipeTl('var(--color-neon)'))
+      .add(function () {
+        gsap.set(menu, { visibility: open ? 'visible' : 'hidden' });
+        if (smoother) smoother.paused(open);
+        menu.classList.remove('slices-live');     // re-mask before the reveal
+        gsap.set(links, { yPercent: 110 });
+      })
+      .add(unwipeTl())
+      .to(links, {
+        yPercent: 0, duration: .8, ease: 'expo.out', stagger: .05,
+        onComplete: function () { if (open) menu.classList.add('slices-live'); }
+      }, open ? '-=0.3' : '>');
+  }
+
+  burger.addEventListener('click', function () { toggleMenu(!open); });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && open) toggleMenu(false); });
+
+  /* ---------- anchors ---------- */
+  gsap.utils.toArray('a[href^="#"]').forEach(function (a) {
+    a.addEventListener('click', function (e) {
+      var id = a.getAttribute('href');
+      if (id.length < 2) return;
+      var el = document.querySelector(id);
+      if (!el) return;
+      e.preventDefault();
+      var go = function () {
+        if (smoother) smoother.scrollTo(el, true, 'top top');
+        else el.scrollIntoView({ behavior: REDUCE ? 'auto' : 'smooth', block: 'start' });
+      };
+      if (open) { toggleMenu(false); gsap.delayedCall(.85, go); } else { go(); }
+    });
+  });
+
+  /* ---------- cursor ---------- */
+  (function cursor() {
+    var el = document.getElementById('cursor');
+    if (!matchMedia('(hover: hover)').matches) return;
+    var xTo = gsap.quickTo(el, 'x', { duration: .35, ease: 'power3' });
+    var yTo = gsap.quickTo(el, 'y', { duration: .35, ease: 'power3' });
+    window.addEventListener('mousemove', function (e) { xTo(e.clientX); yTo(e.clientY); });
+    document.addEventListener('mouseover', function (e) {
+      var hit = e.target.closest('[data-cur], a, button');
+      gsap.to(el, { width: hit ? 38 : 7, height: hit ? 38 : 7, duration: .3, ease: 'expo.out' });
+    });
+  })();
+
+  /* ---------- boot: black plate → mark draws → neon columns → hero ---------- */
+  var booted = false;
+
+  function boot() {
+    if (booted) return;
+    booted = true;
+
+    buildSplits();
+    buildScroll();
+    primeMark();
+
+    if (REDUCE) {
+      gsap.set('[data-up]', { opacity: 1, y: 0 });
+      if (heroChars) gsap.set(heroChars, { yPercent: 0 });
+      gsap.set(loaderEl, { display: 'none' });
+      ScrollTrigger.refresh();
+      return;
+    }
+
+    gsap.timeline({ onComplete: function () { ScrollTrigger.refresh(); } })
+      .add(markTl(), 0)
+      .to('#mark', { autoAlpha: 0, scale: 1.06, duration: .45, ease: 'power2.in', transformOrigin: '50% 50%' }, '+=0.28')
+      .add(wipeTl('var(--color-neon)'), '-=0.28')
+      .set(loaderEl, { display: 'none' })
+      .add(unwipeTl())
+      .to(heroChars || {}, {
+        yPercent: 0, duration: .95, ease: 'expo.out',
+        stagger: { amount: .6, from: 'random' }
+      }, '-=0.7')
+      .from('#hero-eyebrow', { autoAlpha: 0, y: 14, duration: .7, ease: 'expo.out' }, '-=0.6');
+  }
+
+  if (document.fonts && document.fonts.ready) {
+    document.fonts.ready.then(boot).catch(boot);
+    gsap.delayedCall(3, boot);
+  } else {
+    window.addEventListener('load', boot);
+  }
+})();
+</script>
+</body>
+</html>

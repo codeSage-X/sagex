@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+	<meta name="viewport" content="user-scalable=no, width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta name="ad.size" content="width=300,height=600">
+    <meta name="x-rm-alias" content="">
+	<title></title>
+
+    <link rel="stylesheet" href="css/style.css">
+    
+	<script type="text/javascript" src="js/gsap.min.js"></script>
+    <script type="text/javascript" src="js/eskimi_rm.min.js"></script>
+
+</head>
+
+<body class="inner-page">
+
+<div class="wrapper">
+
+	<div class="bg"></div>
+
+    <div class="f1 fw hidden"></div>
+    <div class="t1 fw hidden"></div>
+    <div class="f2 fw hidden"></div>
+    <div class="t2 fw hidden"></div>
+    <div class="f3 fw hidden"></div>
+
+    <div id="videoWrapper" class="container abs fw">
+      <video id="myVideo" src="assets/vid.mp4" muted playinline class="video fw " type="video/mp4"></video>
+    </div>
+
+</div>
+
+<script type="text/javascript">
+
+//////////////////////////////////////////////////// Eskimi Def
+
+var ticket_id = ''; // Replace this with the main ClickUp ticket ID (not the subtask ID)
+
+var assets_url = 'assets/';
+var wrapper = document.querySelector('.wrapper');
+
+var clickTag = '{CLICK_URL}';
+var eventUrl = '{EVENT_URL}';
+
+var campaign_id = '{CAMPAIGN_ID}';
+var creative_set_title = '{CREATIVE_SET_TITLE}';
+var site_title = '{SITE_TITLE}';
+var site_id = '{SITE_ID}';
+var creative_set_id = '{CREATIVE_SET_ID}';
+
+var tracker_id = document.querySelector('meta[name="x-rm-alias"]')?.content;
+var submitUrl = `https://api.eskimi-creatives.com/usage_tracker/tracker.php?ticketid=${ticket_id}&campid=${campaign_id}&cset_id=${creative_set_id}&cset_title=${creative_set_title}&stitle=${site_title}&site_id=${site_id}`;
+
+////////////////////////////////////////////////////
+
+function startEvent(event){
+
+    var track = new Image(); 
+    track.src = eventUrl + event;
+}
+
+function clickThrough(event){
+
+    window.open(clickTag);
+}
+
+var engOb = {
+
+    mouseOver: false,
+    touch: false
+};
+
+function setEng(event){
+
+    if(!engOb.mouseOver && !engOb.touch){         
+            
+        switch(event.type){
+
+            case 'mouseover':
+
+                engOb.mouseOver = true;
+                startEvent('Mouse_Over');
+            break;
+            case 'touchstart':
+
+                engOb.touch = true;
+                startEvent('Touch');
+            break;
+        }
+    }
+}
+
+wrapper.addEventListener('mouseover', setEng);
+wrapper.addEventListener('touchstart', setEng);
+
+document.addEventListener('DOMContentLoaded', ()=>{
+    
+    fetch(submitUrl).then((res) => res.json()).then((data) => {
+
+        // Optional: handle response
+    });
+
+    if(ticket_id === '' || tracker_id === ''){
+
+        console.error('!!!!!! Ticket ID || Tracker not found !!!!!!!');
+    }
+    else{
+
+        startEvent(tracker_id);
+    }
+});
+
+// ========== ==VIDEO CODE: VARIABLE DELCARED  =============
+
+ var videoWrapper = document.getElementById("videoWrapper");
+        var videoElement = document.getElementById("myVideo");
+
+        var cur_ev = {
+            first: false,
+            mid: false,
+            third: false,
+            wasPlaying: true,
+            wasMuted: true,
+            wasPaused: false,
+            wasResume: false,
+            wasComplete: false,
+        };
+
+        function videoMetrics(event_name) {
+            var track = new Image();
+            track.src = "{VIDEO_EVENT_URL}" + event_name;
+        }
+
+        function addVideoEvents(vid) {
+            vid.addEventListener("play", function (e) {
+                if (!cur_ev.wasPlaying) {
+                    cur_ev.wasPlaying = true;
+                    videoMetrics("start");
+                } else {
+                    if (!cur_ev.wasResume) {
+                        cur_ev.wasResume = true;
+                        videoMetrics("resume");
+                    }
+                }
+            }, false);
+            vid.addEventListener("pause", function (e) {
+                if (!cur_ev.wasPaused) {
+                    cur_ev.wasPaused = true;
+                    videoMetrics("pause");
+                }
+            }, false);
+            vid.addEventListener("ended", function (e) {
+                if (!cur_ev.wasComplete) {
+                    cur_ev.wasComplete = true;
+                    videoMetrics("complete");
+                }
+                this.play();
+            }, false);
+            vid.addEventListener("timeupdate", function (e) {
+                let duration = this.duration / 4;
+                let progress = this.currentTime;
+                if (progress > duration) {
+                    if (!cur_ev.first) {
+                        cur_ev.first = true;
+                        videoMetrics("firstQuartile");
+                    }
+                }
+                if (progress > duration * 2) {
+                    if (!cur_ev.mid) {
+                        cur_ev.mid = true;
+                        videoMetrics("midpoint");
+                    }
+                }
+                if (progress > duration * 3) {
+                    if (!cur_ev.third) {
+                        cur_ev.third = true;
+                        videoMetrics("thirdQuartile");
+                    }
+                }
+            }, false);
+        }
+
+// ===== VIDEO START FUNCTION : ALWAYS ADD THE VIDOE EVENTS ========
+function startVideo() {
+
+    addVideoEvents(videoElement);
+
+    // playback speed (1 = normal, 1.5 = 50% faster, 2 = double)
+    videoElement.playbackRate = 1.5;
+
+    videoElement.play();
+   
+}
+
+
+</script>
+
+<script type="text/javascript" src="js/code.js"></script>
+
+</body>
+
+</html>
