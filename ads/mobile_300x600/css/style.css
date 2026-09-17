@@ -1,5 +1,10 @@
 /* Merge into your existing css/style.css — keep whatever reset you already have */
 
+:root {
+    --ad-width: 300px;
+    --ad-height: 600px;
+}
+
 html, body {
     margin: 0;
     padding: 0;
@@ -9,8 +14,8 @@ html, body {
 
 .wrapper {
     position: relative;
-    width: 300px;
-    height: 600px;
+    width: var(--ad-width, 300px);
+    height: var(--ad-height, 600px);
     overflow: hidden;
     opacity: 0;              /* faded up in init() */
     cursor: pointer;
