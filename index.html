@@ -67,9 +67,9 @@
     transform:translate(-50%,-50%) scale(var(--adk,.5));
     transform-origin:center;
   }
-  .ad-frame-250{
-    width:300px;height:250px;
-    transform:translate(-50%,-50%) scale(var(--adk250,.5));
+  .app-frame{
+    width:1000px;height:700px;
+    transform:translate(-50%,-50%) scale(var(--appk,.35));
     transform-origin:center;
   }
 
@@ -525,37 +525,40 @@
     <div class="shade"></div>
     <div class="relative z-[3] mx-auto grid w-full max-w-[1180px] items-center gap-9 lg:grid-cols-[1.06fr_.94fr] lg:gap-14">
       <div data-up class="mos w-full max-w-[760px]">
-        <!-- live HTML5 banner: real build, trackers stripped, inert to clicks -->
-        <div class="m1 ad-cell relative grid place-items-center overflow-hidden border border-hair bg-[#0c1a0a]" data-speed="1.06">
-          <iframe src="ads/mobile_300x600/index.html" title="Mobile — HTML5 display banner, 300x600"
+        <a href="https://mobile-ad.netlify.app/" target="_blank" rel="noopener noreferrer"
+           class="m1 ad-cell relative grid place-items-center overflow-hidden border border-hair bg-[#0c1a0a]" data-speed="1.06" aria-label="Open mobile app preview">
+          <iframe src="https://mobile-ad.netlify.app/" title="Mobile — HTML5 display banner, 300x600"
                   width="300" height="600" scrolling="no" tabindex="-1" loading="eager" allow="autoplay"
                   class="ad-frame pointer-events-none absolute top-1/2 left-1/2 block border-0"></iframe>
           <!-- <span class="cap-fade pointer-events-none absolute inset-x-0 bottom-0 z-[2] px-2 py-1.5 text-center font-display text-mos leading-[1.05] uppercase">Mobile</span> -->
-        </div>
-        <!-- webapp showreel: muted/looping, only fetched + played while in view -->
-        <div class="m2 relative grid place-items-center overflow-hidden border border-hair bg-[#123a06] text-neon">
-          <video class="tile-video absolute inset-0 size-full object-cover" data-src="webapp-loop.mp4"
-                 poster="webapp-poster.png" muted loop playsinline preload="none"
-                 disablepictureinpicture aria-hidden="true" tabindex="-1"></video>
+        </a>
+        <!-- Pages web app preview -->
+        <a href="https://www.shopwithpages.com/" target="_blank" rel="noopener noreferrer"
+           class="m2 relative grid place-items-center overflow-hidden border border-hair bg-[#123a06] text-neon" aria-label="Open Pages">
+          <iframe src="https://www.shopwithpages.com/" title="Pages web app"
+                  width="300" height="600" scrolling="no" tabindex="-1" loading="eager" allow="autoplay"
+                  class="ad-frame pointer-events-none absolute top-1/2 left-1/2 block border-0"></iframe>
           <!-- <span class="cap-fade pointer-events-none absolute inset-x-0 bottom-0 z-[2] px-2 py-1.5 text-center font-display text-mos leading-[1.05] uppercase">Web Apps</span> -->
-        </div>
-        <!-- live HTML5 banner: real build, trackers stripped, inert to clicks -->
-        <div class="m3 ad-cell relative grid place-items-center overflow-hidden border border-hair bg-plum text-neon" data-speed="0.94">
-          <iframe src="ads/samsung-watch-300x600/index.html" title="Samsung watch — HTML5 display banner, 300x600"
+        </a>
+        <a href="https://sumsungx.netlify.app/" target="_blank" rel="noopener noreferrer"
+           class="m3 ad-cell relative grid place-items-center overflow-hidden border border-hair bg-plum text-neon" data-speed="0.94" aria-label="Open Samsung watch preview">
+          <iframe src="https://sumsungx.netlify.app/" title="Samsung watch — HTML5 display banner, 300x600"
                   width="300" height="600" scrolling="no" tabindex="-1" loading="eager" allow="autoplay"
                   class="ad-frame pointer-events-none absolute top-1/2 left-1/2 block border-0"></iframe>
           <span class="cap-fade pointer-events-none absolute inset-x-0 bottom-0 z-[2] px-2 py-1.5 text-center font-display text-mos leading-[1.05] uppercase"></span>
-        </div>
-        <div class="m4 ad-cell relative grid place-items-center overflow-hidden border border-hair bg-[#1b4a10]" data-speed="1">
-          <iframe src="ads/ad_300x600/index.html" title="Rich media campaign — HTML5 display banner, 300x600"
+        </a>
+        <a href="https://ads-campaign.netlify.app/" target="_blank" rel="noopener noreferrer"
+           class="m4 ad-cell relative grid place-items-center overflow-hidden border border-hair bg-[#1b4a10]" data-speed="1" aria-label="Open ads campaign preview">
+          <iframe src="https://ads-campaign.netlify.app/" title="Rich media campaign — HTML5 display banner, 300x600"
             width="300" height="600" scrolling="no" tabindex="-1" loading="eager" allow="autoplay"
             class="ad-frame pointer-events-none absolute top-1/2 left-1/2 block border-0"></iframe>
-        </div>
-        <div class="m5 ad-cell relative grid place-items-center overflow-hidden border border-hair bg-[#08210b]" data-speed="1">
-          <iframe src="ads/API_&_infra_300x600/index.html" title="API and infrastructure — HTML5 display banner, 300x250"
-            width="300" height="250" scrolling="no" tabindex="-1" loading="eager" allow="autoplay"
-            class="ad-frame-250 pointer-events-none absolute top-1/2 left-1/2 block border-0"></iframe>
-        </div>
+        </a>
+        <a href="https://3dcarsimulator.netlify.app/" target="_blank" rel="noopener noreferrer"
+           class="m5 ad-cell relative grid place-items-center overflow-hidden border border-hair bg-[#08210b]" data-speed="1" aria-label="Open 3D car simulator">
+          <iframe src="https://3dcarsimulator.netlify.app/" title="API and infrastructure — 3D car simulator"
+            width="1000" height="700" scrolling="no" tabindex="-1" loading="eager" allow="autoplay"
+            class="app-frame pointer-events-none absolute top-1/2 left-1/2 block border-0"></iframe>
+        </a>
         <div class="m6 relative grid place-items-center overflow-hidden border border-hair bg-[#070c07] p-2.5"><span class="relative z-[2] text-center font-display text-mos leading-[1.05] uppercase">Since&nbsp;2024</span></div>
       </div>
       <div>
@@ -676,8 +679,8 @@
      edge to edge with nothing cropped. */
   (function adFit() {
     var frames = document.querySelectorAll('.ad-frame');
-    var frames250 = document.querySelectorAll('.ad-frame-250');
-    if (!frames.length && !frames250.length) return;
+    var appFrames = document.querySelectorAll('.app-frame');
+    if (!frames.length && !appFrames.length) return;
 
     var GAP = 5, COLS = 6;
 
@@ -695,57 +698,32 @@
       if (w) frame.style.setProperty('--adk', (w / frame.width).toFixed(4));
     }
 
-    function fit250(frame) {
-      var w = frame.parentElement.clientWidth;
-      if (w) frame.style.setProperty('--adk250', (w / frame.width).toFixed(4));
+    function fitApp(frame) {
+      var cell = frame.parentElement,
+          scale = Math.min(cell.clientWidth / frame.width, cell.clientHeight / frame.height);
+      if (scale) frame.style.setProperty('--appk', scale.toFixed(4));
     }
 
     frames.forEach(fit);
-    frames250.forEach(fit250);
+    appFrames.forEach(fitApp);
 
     if (window.ResizeObserver) {
       var ro = new ResizeObserver(function (entries) {
         entries.forEach(function (e) {
           var f = e.target.querySelector('.ad-frame');
           if (f) fit(f);
-          var f250 = e.target.querySelector('.ad-frame-250');
-          if (f250) fit250(f250);
+          var app = e.target.querySelector('.app-frame');
+          if (app) fitApp(app);
         });
       });
       frames.forEach(function (f) { ro.observe(f.parentElement.closest('.mos') || f.parentElement); });
-      frames250.forEach(function (f) { ro.observe(f.parentElement); });
+      appFrames.forEach(function (f) { ro.observe(f.parentElement); });
     } else {
       window.addEventListener('resize', function () {
         frames.forEach(fit);
-        frames250.forEach(fit250);
+        appFrames.forEach(fitApp);
       });
     }
-  })();
-
-  /* ---------- tile video: fetch and play only while it's on screen ----------
-     preload="none" + a data-src means nothing downloads until the tile scrolls
-     close, and playback pauses when it leaves so it isn't decoding off-screen.
-     Reduced-motion keeps the poster frame and never loads the video at all. */
-  (function tileVideo() {
-    var vids = document.querySelectorAll('.tile-video');
-    if (!vids.length) return;
-
-    if (REDUCE || !('IntersectionObserver' in window)) return;   // poster only
-
-    var io = new IntersectionObserver(function (entries) {
-      entries.forEach(function (e) {
-        var v = e.target;
-        if (e.isIntersecting) {
-          if (!v.src && v.dataset.src) v.src = v.dataset.src;
-          var p = v.play();
-          if (p && p.catch) p.catch(function () {});             // autoplay refused: poster stays
-        } else if (!v.paused) {
-          v.pause();
-        }
-      });
-    }, { rootMargin: '200px 0px' });
-
-    vids.forEach(function (v) { io.observe(v); });
   })();
 
   /* ---------- 4-column wipe ---------- */
