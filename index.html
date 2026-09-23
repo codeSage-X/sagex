@@ -66,11 +66,21 @@
     width:300px;height:600px;
     transform:translate(-50%,-50%) scale(var(--adk,.5));
     transform-origin:center;
+    z-index:1;
+    background:var(--page-bg);
   }
   .app-frame{
     width:1000px;height:700px;
     transform:translate(-50%,-50%) scale(var(--appk,.35));
     transform-origin:center;
+    z-index:1;
+    background:var(--page-bg);
+  }
+  .embed-fallback{
+    position:relative;
+    z-index:0;
+    max-width:80%;
+    text-align:center;
   }
 
   /* scrims: one veil colour per theme instead of hardcoded rgba() */
@@ -527,36 +537,40 @@
       <div data-up class="mos w-full max-w-[760px]">
         <a href="https://mobile-ad.netlify.app/" target="_blank" rel="noopener noreferrer"
            class="m1 ad-cell relative grid place-items-center overflow-hidden border border-hair bg-[#0c1a0a]" data-speed="1.06" aria-label="Open mobile app preview">
-          <iframe src="https://mobile-ad.netlify.app/" title="Mobile — HTML5 display banner, 300x600"
-                  width="300" height="600" scrolling="no" tabindex="-1" loading="eager" allow="autoplay"
+          <span class="embed-fallback font-display text-mos leading-[1.05] uppercase">Mobile</span>
+          <iframe data-src="https://mobile-ad.netlify.app/" title="Mobile — HTML5 display banner, 300x600"
+                  width="300" height="600" scrolling="no" tabindex="-1" loading="lazy" allow="autoplay"
                   class="ad-frame pointer-events-none absolute top-1/2 left-1/2 block border-0"></iframe>
           <!-- <span class="cap-fade pointer-events-none absolute inset-x-0 bottom-0 z-[2] px-2 py-1.5 text-center font-display text-mos leading-[1.05] uppercase">Mobile</span> -->
         </a>
         <!-- Pages web app preview -->
         <a href="https://www.shopwithpages.com/" target="_blank" rel="noopener noreferrer"
            class="m2 relative grid place-items-center overflow-hidden border border-hair bg-[#123a06] text-neon" aria-label="Open Pages">
-          <iframe src="https://www.shopwithpages.com/" title="Pages web app"
-                  width="300" height="600" scrolling="no" tabindex="-1" loading="eager" allow="autoplay"
+          <span class="embed-fallback font-display text-mos leading-[1.05] uppercase">Web apps</span>
+          <iframe data-src="https://www.shopwithpages.com/" title="Pages web app"
+                  width="300" height="600" scrolling="no" tabindex="-1" loading="lazy" allow="autoplay"
                   class="ad-frame pointer-events-none absolute top-1/2 left-1/2 block border-0"></iframe>
           <!-- <span class="cap-fade pointer-events-none absolute inset-x-0 bottom-0 z-[2] px-2 py-1.5 text-center font-display text-mos leading-[1.05] uppercase">Web Apps</span> -->
         </a>
         <a href="https://sumsungx.netlify.app/" target="_blank" rel="noopener noreferrer"
            class="m3 ad-cell relative grid place-items-center overflow-hidden border border-hair bg-plum text-neon" data-speed="0.94" aria-label="Open Samsung watch preview">
-          <iframe src="https://sumsungx.netlify.app/" title="Samsung watch — HTML5 display banner, 300x600"
-                  width="300" height="600" scrolling="no" tabindex="-1" loading="eager" allow="autoplay"
+          <span class="embed-fallback font-display text-mos leading-[1.05] uppercase">Wearables</span>
+          <iframe data-src="https://sumsungx.netlify.app/" title="Samsung watch — HTML5 display banner, 300x600"
+                  width="300" height="600" scrolling="no" tabindex="-1" loading="lazy" allow="autoplay"
                   class="ad-frame pointer-events-none absolute top-1/2 left-1/2 block border-0"></iframe>
           <span class="cap-fade pointer-events-none absolute inset-x-0 bottom-0 z-[2] px-2 py-1.5 text-center font-display text-mos leading-[1.05] uppercase"></span>
         </a>
-        <a href="https://ads-campaign.netlify.app/" target="_blank" rel="noopener noreferrer"
-           class="m4 ad-cell relative grid place-items-center overflow-hidden border border-hair bg-[#1b4a10]" data-speed="1" aria-label="Open ads campaign preview">
-          <iframe src="https://ads-campaign.netlify.app/" title="Rich media campaign — HTML5 display banner, 300x600"
-            width="300" height="600" scrolling="no" tabindex="-1" loading="eager" allow="autoplay"
-            class="ad-frame pointer-events-none absolute top-1/2 left-1/2 block border-0"></iframe>
-        </a>
+        <div class="m4 ad-cell relative grid place-items-center overflow-hidden border border-hair bg-[#1b4a10]" data-speed="1">
+          <span class="embed-fallback font-display text-mos leading-[1.05] uppercase">Rich media</span>
+          <iframe data-src="https://ads-campaign.netlify.app/" data-autoload title="Rich media campaign — HTML5 display banner, 300x600"
+            width="300" height="600" scrolling="no" loading="eager" allow="autoplay; fullscreen"
+            class="ad-frame absolute top-1/2 left-1/2 block border-0"></iframe>
+        </div>
         <a href="https://3dcarsimulator.netlify.app/" target="_blank" rel="noopener noreferrer"
            class="m5 ad-cell relative grid place-items-center overflow-hidden border border-hair bg-[#08210b]" data-speed="1" aria-label="Open 3D car simulator">
-          <iframe src="https://3dcarsimulator.netlify.app/" title="API and infrastructure — 3D car simulator"
-            width="1000" height="700" scrolling="no" tabindex="-1" loading="eager" allow="autoplay"
+          <span class="embed-fallback font-display text-mos leading-[1.05] uppercase">3D systems</span>
+          <iframe data-src="https://3dcarsimulator.netlify.app/" data-mobile-static title="API and infrastructure — 3D car simulator"
+            width="1000" height="700" scrolling="no" tabindex="-1" loading="lazy" allow="autoplay"
             class="app-frame pointer-events-none absolute top-1/2 left-1/2 block border-0"></iframe>
         </a>
         <div class="m6 relative grid place-items-center overflow-hidden border border-hair bg-[#070c07] p-2.5"><span class="relative z-[2] text-center font-display text-mos leading-[1.05] uppercase">Since&nbsp;2024</span></div>
@@ -670,6 +684,87 @@
     }
     x.putImageData(d, 0, 0);
     document.documentElement.style.setProperty('--noise', 'url(' + c.toDataURL() + ')');
+  })();
+
+  /* ---------- remote embeds ----------
+     Warm each destination into the browser cache after the page settles, but do
+     it serially so mobile Safari never boots several remote apps at once. The
+     3D preview remains a tap-through tile on small screens; rich media starts
+     automatically, and the other frames hydrate when the mosaic is nearby. */
+  (function remoteEmbeds() {
+    var embeds = Array.prototype.slice.call(document.querySelectorAll('iframe[data-src]'));
+    if (!embeds.length) return;
+
+    var mobile = matchMedia('(max-width: 760px), (pointer: coarse)').matches;
+
+    function prefetch(url) {
+      return new Promise(function (resolve) {
+        var settled = false;
+        var link = document.createElement('link');
+
+        function finish() {
+          if (settled) return;
+          settled = true;
+          link.onload = link.onerror = null;
+          setTimeout(resolve, mobile ? 600 : 200);
+        }
+
+        link.rel = 'prefetch';
+        link.href = url;
+        link.as = 'document';
+        link.fetchPriority = 'low';
+        link.onload = finish;
+        link.onerror = finish;
+        document.head.appendChild(link);
+
+        // Some Safari versions do not emit load/error for prefetch hints.
+        setTimeout(finish, 4000);
+      });
+    }
+
+    function warmDestinations() {
+      var urls = embeds.filter(function (frame) { return !frame.hasAttribute('data-autoload'); })
+        .map(function (frame) { return frame.dataset.src; })
+        .filter(function (url, index, all) { return all.indexOf(url) === index; });
+
+      urls.reduce(function (queue, url) {
+        return queue.then(function () { return prefetch(url); });
+      }, Promise.resolve());
+    }
+
+    window.addEventListener('load', function () {
+      setTimeout(function () {
+        embeds.filter(function (frame) { return frame.hasAttribute('data-autoload'); })
+          .forEach(load);
+      }, mobile ? 600 : 250);
+      setTimeout(warmDestinations, mobile ? 1600 : 800);
+    }, { once: true });
+
+    function load(frame) {
+      if (frame.dataset.loaded || (mobile && frame.hasAttribute('data-mobile-static'))) return;
+      frame.dataset.loaded = 'true';
+      frame.src = frame.dataset.src;
+    }
+
+    if (!('IntersectionObserver' in window)) {
+      embeds.forEach(function (frame, i) {
+        setTimeout(function () { load(frame); }, i * 180);
+      });
+      return;
+    }
+
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (!entry.isIntersecting) return;
+        load(entry.target);
+        io.unobserve(entry.target);
+      });
+    }, {
+      rootMargin: mobile ? '120px 0px' : '600px 0px',
+      threshold: 0.01
+    });
+
+    embeds.forEach(function (frame) { io.observe(frame); });
   })();
 
   /* ---------- embedded banner: make the cell match the creative exactly ----------
