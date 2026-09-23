@@ -562,7 +562,7 @@
         </a>
         <div class="m4 ad-cell relative grid place-items-center overflow-hidden border border-hair bg-[#1b4a10]" data-speed="1">
           <span class="embed-fallback font-display text-mos leading-[1.05] uppercase">Rich media</span>
-          <iframe data-src="https://ads-campaign.netlify.app/" data-autoload title="Rich media campaign — HTML5 display banner, 300x600"
+          <iframe src="https://ads-campaign.netlify.app/" title="Rich media campaign — HTML5 display banner, 300x600"
             width="300" height="600" scrolling="no" loading="eager" allow="autoplay; fullscreen"
             class="ad-frame absolute top-1/2 left-1/2 block border-0"></iframe>
         </div>
@@ -723,8 +723,7 @@
     }
 
     function warmDestinations() {
-      var urls = embeds.filter(function (frame) { return !frame.hasAttribute('data-autoload'); })
-        .map(function (frame) { return frame.dataset.src; })
+      var urls = embeds.map(function (frame) { return frame.dataset.src; })
         .filter(function (url, index, all) { return all.indexOf(url) === index; });
 
       urls.reduce(function (queue, url) {
@@ -733,11 +732,7 @@
     }
 
     window.addEventListener('load', function () {
-      setTimeout(function () {
-        embeds.filter(function (frame) { return frame.hasAttribute('data-autoload'); })
-          .forEach(load);
-      }, mobile ? 600 : 250);
-      setTimeout(warmDestinations, mobile ? 1600 : 800);
+      setTimeout(warmDestinations, mobile ? 900 : 300);
     }, { once: true });
 
     function load(frame) {
