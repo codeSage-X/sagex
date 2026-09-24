@@ -41,7 +41,15 @@
     --color-hair:rgba(0,0,0,.18);
   }
 
+  html{
+    scroll-behavior:smooth;
+    scroll-snap-type:y mandatory;
+  }
   html,body{margin:0;background:var(--page-bg);color:var(--page-fg)}
+  main>section{
+    scroll-snap-align:start;
+    scroll-snap-stop:always;
+  }
   #loader{position:fixed;inset:0;z-index:210;background:var(--loader-bg);display:grid;place-items:center}
   #mark{width:min(74vw,780px);height:auto;overflow:visible;display:block}
   #mark .ln{visibility:hidden}
@@ -158,6 +166,10 @@
     transform:translateY(-50%) rotate(-1.2deg) scaleX(1);
     opacity:0;
     transition:transform .22s cubic-bezier(.2,.7,.2,1),opacity .16s linear .22s;
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    html{scroll-behavior:auto;scroll-snap-type:y proximity}
   }
 </style>
 
@@ -841,16 +853,7 @@
       .set(wipe, { visibility: 'hidden' });
   }
 
-  /* ---------- ScrollSmoother ---------- */
-  if (window.ScrollSmoother) {
-    gsap.matchMedia().add('(min-width: 861px) and (prefers-reduced-motion: no-preference)', function () {
-      smoother = ScrollSmoother.create({
-        wrapper: '#smooth-wrapper', content: '#smooth-content',
-        smooth: 1.15, effects: true, smoothTouch: 0
-      });
-      return function () { smoother = null; };
-    });
-  }
+  /* Native scroll snapping owns page movement on desktop and mobile. */
 
   /* ---------------------------------------------------------
      Loader mark: a tracer node runs the letterforms with
