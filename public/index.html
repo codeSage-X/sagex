@@ -168,6 +168,20 @@
     transition:transform .22s cubic-bezier(.2,.7,.2,1),opacity .16s linear .22s;
   }
 
+  /* Selected work: the featured plate crossfades to whichever index row is active. */
+  .feat-shot{
+    position:absolute;inset:0;width:100%;height:100%;object-fit:cover;
+    opacity:0;transform:scale(1.04);
+    transition:opacity .7s cubic-bezier(.19,1,.22,1),transform 1.4s cubic-bezier(.19,1,.22,1);
+  }
+  .feat-shot.is-on{opacity:1;transform:none}
+  .idx-row.is-active{padding-left:1rem}
+  .idx-row.is-active::after{width:100%}
+  .idx-row.is-active .idx-num{color:var(--color-neon)}
+  @media (prefers-reduced-motion: reduce){
+    .feat-shot{transition:none;transform:none}
+  }
+
   @media (prefers-reduced-motion: reduce){
     html{scroll-behavior:auto;scroll-snap-type:y proximity}
   }
@@ -484,26 +498,35 @@
     <div class="shade"></div>
 
     <div class="relative z-[3] w-full">
-      <div class="mx-auto grid w-full max-w-[1240px] lg:grid-cols-[.9fr_1.1fr] lg:items-stretch">
+      <div id="feat" class="mx-auto grid w-full max-w-[1240px] lg:grid-cols-[.9fr_1.1fr] lg:items-stretch">
         <div class="pb-8 lg:flex lg:flex-col lg:justify-center lg:py-2 lg:pr-12 lg:pb-2">
-          <h3 data-split class="font-display text-sm2 leading-[.95] uppercase">Pages — commerce platform</h3>
-          <p data-up class="mt-3.5 max-w-[52ch] text-[13.5px] leading-[1.85] text-neon/65">A storefront and back office in one Next.js app — catalogue, cart, checkout, and order fulfilment, with inventory that stays honest under concurrent buys. Server-rendered product pages, a typed data layer, and payments that reconcile against the ledger, not the webhook.</p>
-          <p data-up class="mt-3 text-[12px] tracking-[.05em] text-haze">Next.js · TypeScript · Postgres · Stripe</p>
-          <div data-up class="mt-7"><a href="https://www.shopwithpages.com" target="_blank" rel="noopener noreferrer" data-cur class="btn relative isolate inline-block overflow-hidden border border-hair px-[22px] py-3 text-[10.5px] tracking-[.13em] uppercase"><span class="relative z-[2] transition-colors duration-500 ease-expo">See this project</span></a></div>
+          <div data-up>
+            <h3 id="feat-title" class="feat-swap font-display text-sm2 leading-[.95] uppercase">Pages — commerce platform</h3>
+            <p id="feat-desc" class="feat-swap mt-3.5 max-w-[52ch] text-[13.5px] leading-[1.85] text-neon/65">A storefront and back office in one Next.js app — catalogue, cart, checkout, and order fulfilment, with inventory that stays honest under concurrent buys. Server-rendered product pages, a typed data layer, and payments that reconcile against the ledger, not the webhook.</p>
+            <p id="feat-stack" class="feat-swap mt-3 text-[12px] tracking-[.05em] text-haze">Next.js · TypeScript · Postgres · Stripe</p>
+          </div>
+          <div data-up class="mt-7"><a id="feat-link" href="https://www.shopwithpages.com" target="_blank" rel="noopener noreferrer" data-cur class="btn relative isolate inline-block overflow-hidden border border-hair px-[22px] py-3 text-[10.5px] tracking-[.13em] uppercase"><span class="relative z-[2] transition-colors duration-500 ease-expo">See this project</span></a></div>
         </div>
         <div data-reveal class="plate relative min-h-[clamp(220px,42vh,440px)] overflow-hidden border border-hair">
-          <img src="pages.png" alt="Pages storefront — footwear catalogue home page with a promoted sneaker banner"
-               loading="lazy" decoding="async"
-               class="absolute inset-0 size-full object-cover object-left">
-          <span class="cap-fade absolute inset-x-0 bottom-0 z-[2] px-4 py-3.5 text-[10px] tracking-[.16em] uppercase"></span>
+          <img data-shot="pages" src="work/pages.jpg" alt="Pages storefront — footwear catalogue home page with a promoted sneaker banner" decoding="async" class="feat-shot is-on object-left">
+          <img data-shot="mently" src="work/mently.jpg" alt="Mently home page — mentorship headline beside the organisation overview dashboard" loading="lazy" decoding="async" class="feat-shot object-left-top">
+          <img data-shot="escobar" src="work/escobar.jpg" alt="Escobar website — gold Escobar by The Boss logo on a black page" loading="lazy" decoding="async" class="feat-shot">
+          <img data-shot="creekngreek" src="work/creekngreek.jpg" alt="Creek n Greek website — aerial view of the resort pool and lounge" loading="lazy" decoding="async" class="feat-shot object-top">
+          <img data-shot="signalface" src="work/signalface.jpg" alt="Signal Face app — For You video feed with the creator sidebar" loading="lazy" decoding="async" class="feat-shot object-left-top">
+          <img data-shot="cod" src="work/cod.jpg" alt="Cash on Delivery gameplay — delivery rider on a Lagos road with the score and timer HUD" loading="lazy" decoding="async" class="feat-shot">
+          <img data-shot="garagebandz" src="work/garagebandz.jpg" alt="GarageBandZ website — neon street racing car in a night-time city" loading="lazy" decoding="async" class="feat-shot">
+          <span id="feat-cap" class="cap-fade absolute inset-x-0 bottom-0 z-[2] px-4 py-3.5 text-[10px] tracking-[.16em] uppercase">01 — shopwithpages.com</span>
         </div>
       </div>
 
-      <div class="mx-auto mt-11 w-full max-w-[1240px] border-t border-hair">
-        <a href="https://mymently.com" target="_blank" rel="noopener noreferrer" data-cur data-up class="idx-row relative grid grid-cols-[auto_1fr_auto] items-baseline gap-4 border-b border-hair px-0.5 py-[15px] transition-[padding] duration-500 ease-expo hover:pl-4"><span class="w-[26px] text-[10px] tracking-[.1em] text-haze">02</span><span class="font-display text-[clamp(15px,2vw,25px)] leading-none uppercase">Mently</span><span class="text-right text-[10.5px] tracking-[.1em] text-haze uppercase">Learning · Next.js</span></a>
-        <a href="https://www.escobarbytheboss.com/" target="_blank" rel="noopener noreferrer" data-cur data-up class="idx-row relative grid grid-cols-[auto_1fr_auto] items-baseline gap-4 border-b border-hair px-0.5 py-[15px] transition-[padding] duration-500 ease-expo hover:pl-4"><span class="w-[26px] text-[10px] tracking-[.1em] text-haze">03</span><span class="font-display text-[clamp(15px,2vw,25px)] leading-none uppercase">Escobar</span><span class="text-right text-[10.5px] tracking-[.1em] text-haze uppercase">Lounge · Website</span></a>
-        <a href="https://creekngreek.com" target="_blank" rel="noopener noreferrer" data-cur data-up class="idx-row relative grid grid-cols-[auto_1fr_auto] items-baseline gap-4 border-b border-hair px-0.5 py-[15px] transition-[padding] duration-500 ease-expo hover:pl-4"><span class="w-[26px] text-[10px] tracking-[.1em] text-haze">04</span><span class="font-display text-[clamp(15px,2vw,25px)] leading-none uppercase">Creek n Greek</span><span class="text-right text-[10.5px] tracking-[.1em] text-haze uppercase">Lounge · Website</span></a>
-        <a href="https://signalface.com" target="_blank" rel="noopener noreferrer" data-cur data-up class="idx-row relative grid grid-cols-[auto_1fr_auto] items-baseline gap-4 border-b border-hair px-0.5 py-[15px] transition-[padding] duration-500 ease-expo hover:pl-4"><span class="w-[26px] text-[10px] tracking-[.1em] text-haze">05</span><span class="font-display text-[clamp(15px,2vw,25px)] leading-none uppercase">Signal Face</span><span class="text-right text-[10.5px] tracking-[.1em] text-haze uppercase">Social · NestJS</span></a>
+      <div id="work-index" class="mx-auto mt-11 w-full max-w-[1240px] border-t border-hair lg:grid lg:grid-flow-col lg:grid-rows-4 lg:gap-x-12">
+        <a href="https://www.shopwithpages.com" data-key="pages" aria-current="true" target="_blank" rel="noopener noreferrer" data-cur data-up class="idx-row is-active relative grid grid-cols-[auto_1fr_auto] items-baseline gap-4 border-b border-hair px-0.5 py-[15px] transition-[padding] duration-500 ease-expo hover:pl-4"><span class="idx-num w-[26px] text-[10px] tracking-[.1em] text-haze">01</span><span class="font-display text-[clamp(15px,2vw,25px)] leading-none uppercase">Pages</span><span class="text-right text-[10.5px] tracking-[.1em] text-haze uppercase">Commerce · Next.js</span></a>
+        <a href="https://mymently.com" data-key="mently" target="_blank" rel="noopener noreferrer" data-cur data-up class="idx-row relative grid grid-cols-[auto_1fr_auto] items-baseline gap-4 border-b border-hair px-0.5 py-[15px] transition-[padding] duration-500 ease-expo hover:pl-4"><span class="idx-num w-[26px] text-[10px] tracking-[.1em] text-haze">02</span><span class="font-display text-[clamp(15px,2vw,25px)] leading-none uppercase">Mently</span><span class="text-right text-[10.5px] tracking-[.1em] text-haze uppercase">Learning · Next.js</span></a>
+        <a href="https://www.escobarbytheboss.com/" data-key="escobar" target="_blank" rel="noopener noreferrer" data-cur data-up class="idx-row relative grid grid-cols-[auto_1fr_auto] items-baseline gap-4 border-b border-hair px-0.5 py-[15px] transition-[padding] duration-500 ease-expo hover:pl-4"><span class="idx-num w-[26px] text-[10px] tracking-[.1em] text-haze">03</span><span class="font-display text-[clamp(15px,2vw,25px)] leading-none uppercase">Escobar</span><span class="text-right text-[10.5px] tracking-[.1em] text-haze uppercase">Lounge · Website</span></a>
+        <a href="https://creekngreek.com" data-key="creekngreek" target="_blank" rel="noopener noreferrer" data-cur data-up class="idx-row relative grid grid-cols-[auto_1fr_auto] items-baseline gap-4 border-b border-hair px-0.5 py-[15px] transition-[padding] duration-500 ease-expo hover:pl-4"><span class="idx-num w-[26px] text-[10px] tracking-[.1em] text-haze">04</span><span class="font-display text-[clamp(15px,2vw,25px)] leading-none uppercase">Creek n Greek</span><span class="text-right text-[10.5px] tracking-[.1em] text-haze uppercase">Lounge · Website</span></a>
+        <a href="https://signalface.com" data-key="signalface" target="_blank" rel="noopener noreferrer" data-cur data-up class="idx-row relative grid grid-cols-[auto_1fr_auto] items-baseline gap-4 border-b border-hair px-0.5 py-[15px] transition-[padding] duration-500 ease-expo hover:pl-4"><span class="idx-num w-[26px] text-[10px] tracking-[.1em] text-haze">05</span><span class="font-display text-[clamp(15px,2vw,25px)] leading-none uppercase">Signal Face</span><span class="text-right text-[10.5px] tracking-[.1em] text-haze uppercase">Social · NestJS</span></a>
+        <a href="https://cod.sagexlimited.com" data-key="cod" target="_blank" rel="noopener noreferrer" data-cur data-up class="idx-row relative grid grid-cols-[auto_1fr_auto] items-baseline gap-4 border-b border-hair px-0.5 py-[15px] transition-[padding] duration-500 ease-expo hover:pl-4"><span class="idx-num w-[26px] text-[10px] tracking-[.1em] text-haze">06</span><span class="font-display text-[clamp(15px,2vw,25px)] leading-none uppercase">Cash on Delivery</span><span class="text-right text-[10.5px] tracking-[.1em] text-haze uppercase">Game · Three.js</span></a>
+        <a href="https://www.garagebandz.com" data-key="garagebandz" target="_blank" rel="noopener noreferrer" data-cur data-up class="idx-row relative grid grid-cols-[auto_1fr_auto] items-baseline gap-4 border-b border-hair px-0.5 py-[15px] transition-[padding] duration-500 ease-expo hover:pl-4"><span class="idx-num w-[26px] text-[10px] tracking-[.1em] text-haze">07</span><span class="font-display text-[clamp(15px,2vw,25px)] leading-none uppercase">GarageBandZ</span><span class="text-right text-[10.5px] tracking-[.1em] text-haze uppercase">Game · Three.js</span></a>
       </div>
     </div>
   </section>
@@ -1289,5 +1312,87 @@
   }
 })();
 </script>
+<script>
+/* Selected work: hovering (or focusing) an index row makes it the featured project. */
+(function () {
+  var P = {
+    pages: { n: '01', title: 'Pages — commerce platform', host: 'shopwithpages.com',
+      desc: 'A storefront and back office in one Next.js app — catalogue, cart, checkout, and order fulfilment, with inventory that stays honest under concurrent buys. Server-rendered product pages, a typed data layer, and payments that reconcile against the ledger, not the webhook.',
+      stack: 'Next.js · TypeScript · Postgres · Stripe' },
+    mently: { n: '02', title: 'Mently — mentorship infrastructure', host: 'mymently.com',
+      desc: 'Talent development infrastructure for mentorship programmes. Accelerators, nonprofits, universities and workforce programmes run structured cohorts, track skill progression, and turn mentorship into a talent pipeline they can actually measure.',
+      stack: 'Next.js · React' },
+    escobar: { n: '03', title: 'Escobar — nightlife website', host: 'escobarbytheboss.com',
+      desc: "The online home of Port Harcourt's premier nightlife spot. A dark, gold-lit site that sets the mood before the doors open, with the bar's story, what's on, and table bookings a tap away.",
+      stack: 'Web · Vercel' },
+    creekngreek: { n: '04', title: 'Creek n Greek — resort website', host: 'creekngreek.com',
+      desc: 'A waterfront resort in Port Harcourt and its sister venue, Greek Imperial, under one roof online: a video-led home page, gallery, menu, events and guest feedback, built to sell the poolside and rooftop experience.',
+      stack: 'Next.js · React · Vercel' },
+    signalface: { n: '05', title: 'Signal Face — social platform', host: 'signalface.com',
+      desc: 'Own your influence. A social platform where creators post and fans buy, hold and trade creator signals — with a For You feed, explore, messaging, a marketplace and rewards.',
+      stack: 'Next.js · NestJS' },
+    cod: { n: '06', title: 'Cash on Delivery — browser game', host: 'cod.sagexlimited.com',
+      desc: 'Race the clock through Lagos traffic on your delivery bike. A free 3D game that runs straight in the browser, with player accounts, timed races and a live leaderboard, plus an admin dashboard for players, sessions and races.',
+      stack: 'Three.js · TypeScript · NestJS · Postgres' },
+    garagebandz: { n: '07', title: 'GarageBandZ — street racing game', host: 'garagebandz.com',
+      desc: 'Build your ride. Own the streets. A street racing game set in real Lagos — build your car in the garage, race, and climb the leaderboard. The PC version is live, with mobile on the way.',
+      stack: 'Three.js · React · NestJS · Firebase · Next.js' }
+  };
+
+  var list = document.getElementById('work-index');
+  if (!list) return;
+  var rows  = Array.prototype.slice.call(list.querySelectorAll('.idx-row[data-key]'));
+  var shots = Array.prototype.slice.call(document.querySelectorAll('#feat [data-shot]'));
+  var title = document.getElementById('feat-title'), desc = document.getElementById('feat-desc'),
+      stack = document.getElementById('feat-stack'), link = document.getElementById('feat-link'),
+      cap   = document.getElementById('feat-cap');
+  var reduce  = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var noHover = matchMedia('(hover: none)').matches;
+  var active = 'pages', timer = 0;
+
+  function show(key) {
+    var p = P[key];
+    if (!p || key === active) return;
+    active = key;
+
+    rows.forEach(function (r) {
+      var on = r.dataset.key === key;
+      r.classList.toggle('is-active', on);
+      if (on) r.setAttribute('aria-current', 'true'); else r.removeAttribute('aria-current');
+    });
+    shots.forEach(function (img) { img.classList.toggle('is-on', img.dataset.shot === key); });
+
+    var row = rows.filter(function (r) { return r.dataset.key === key; })[0];
+    link.href = row.href;
+    cap.textContent = p.n + ' — ' + p.host;
+
+    // Content swaps immediately; the animation is only decoration on top of it.
+    title.textContent = p.title; desc.textContent = p.desc; stack.textContent = p.stack;
+    if (reduce || !window.gsap) return;
+    var els = [title, desc, stack];
+    gsap.killTweensOf(els);
+    gsap.fromTo(els, { opacity: 0, y: 12 }, { opacity: 1, y: 0, duration: .55, ease: 'expo.out', stagger: .05, overwrite: true });
+  }
+
+  rows.forEach(function (r) {
+    // A short delay stops the panel flickering while the pointer sweeps across several rows.
+    r.addEventListener('mouseenter', function () { clearTimeout(timer); timer = setTimeout(function () { show(r.dataset.key); }, 70); });
+    r.addEventListener('mouseleave', function () { clearTimeout(timer); });
+    r.addEventListener('focus', function () { show(r.dataset.key); });
+    // Touch screens have no hover: the first tap features the project, a second tap opens it.
+    r.addEventListener('click', function (e) {
+      if (!noHover || r.dataset.key === active) return;
+      e.preventDefault();
+      show(r.dataset.key);
+      var plate = document.querySelector('#feat .plate');
+      if (plate.getBoundingClientRect().top < 0) {
+        var sm = window.ScrollSmoother && ScrollSmoother.get();
+        if (sm) sm.scrollTo('#feat', true, 'top 60px'); else document.getElementById('feat').scrollIntoView({ behavior: reduce ? 'auto' : 'smooth' });
+      }
+    });
+  });
+})();
+</script>
+
 </body>
 </html>
