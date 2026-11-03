@@ -1377,9 +1377,10 @@
     r.addEventListener('mouseenter', function () { clearTimeout(timer); timer = setTimeout(function () { show(r.dataset.key); }, 70); });
     r.addEventListener('mouseleave', function () { clearTimeout(timer); });
     r.addEventListener('focus', function () { show(r.dataset.key); });
-    // Touch screens have no hover: the first tap features the project, a second tap opens it.
+    // Touch screens have no hover: tapping a row only features that project.
+    // Opening the site is left to the "See this project" button.
     r.addEventListener('click', function (e) {
-      if (!noHover || r.dataset.key === active) return;
+      if (!noHover) return;
       e.preventDefault();
       show(r.dataset.key);
       var plate = document.querySelector('#feat .plate');

@@ -7,6 +7,9 @@
   // public/ is served straight from Cloudflare's edge; only unmatched paths run the Nest Worker.
   "assets": {
     "directory": "public",
+    "binding": "ASSETS",
+    // Video goes through the Worker so byte-range requests get a 206 (Safari needs it to play).
+    "run_worker_first": ["/work/*.mp4"],
     "html_handling": "auto-trailing-slash",
     "not_found_handling": "none"
   },
