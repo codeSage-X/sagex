@@ -1,0 +1,24 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "sagex",
+  "main": "dist/worker.js",
+  "compatibility_date": "2026-10-01",
+  "compatibility_flags": ["nodejs_compat"],
+  // public/ is served straight from Cloudflare's edge; only unmatched paths run the Nest Worker.
+  "assets": {
+    "directory": "public",
+    "html_handling": "auto-trailing-slash",
+    "not_found_handling": "none"
+  },
+  // Optional Nest packages that this app never uses; see stubs/optional.
+  "alias": {
+    "@nestjs/microservices": "./stubs/optional",
+    "@nestjs/websockets": "./stubs/optional",
+    "@nestjs/microservices/microservices-module.js": "./stubs/optional/microservices-module.js",
+    "@nestjs/websockets/socket-module.js": "./stubs/optional/socket-module.js",
+    "class-transformer": "./stubs/optional",
+    "class-validator": "./stubs/optional",
+    "file-type": "./stubs/optional"
+  },
+  "observability": { "enabled": true }
+}
