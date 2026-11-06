@@ -509,11 +509,11 @@
         </div>
         <div data-reveal class="plate relative min-h-[clamp(220px,42vh,440px)] overflow-hidden border border-hair">
           <video data-shot="cod" src="work/cod-trailer.mp4" poster="work/cod.jpg" muted loop playsinline preload="none" aria-label="Cash on Delivery trailer — styling the rider, then racing a delivery bike through Lagos traffic" class="feat-shot is-on"></video>
-          <img data-shot="garagebandz" src="work/garagebandz.jpg" alt="GarageBandZ website — neon street racing car in a night-time city" loading="lazy" decoding="async" class="feat-shot">
-          <img data-shot="pages" src="work/pages.jpg" alt="Pages storefront — footwear catalogue home page with a promoted sneaker banner" loading="lazy" decoding="async" class="feat-shot object-left">
-          <img data-shot="escobar" src="work/escobar.jpg" alt="Escobar website — gold Escobar by The Boss logo on a black page" loading="lazy" decoding="async" class="feat-shot">
-          <img data-shot="creekngreek" src="work/creekngreek.jpg" alt="Creek n Greek website — aerial view of the resort pool and lounge" loading="lazy" decoding="async" class="feat-shot object-top">
-          <img data-shot="signalface" src="work/signalface.jpg" alt="Signal Face app — For You video feed with the creator sidebar" loading="lazy" decoding="async" class="feat-shot object-left-top">
+          <img data-shot="garagebandz" src="work/garagebandz.jpg" alt="GarageBandZ website — neon street racing car in a night-time city" decoding="async" class="feat-shot">
+          <img data-shot="pages" src="work/pages.jpg" alt="Pages storefront — footwear catalogue home page with a promoted sneaker banner" decoding="async" class="feat-shot object-left">
+          <img data-shot="escobar" src="work/escobar.jpg" alt="Escobar website — gold Escobar by The Boss logo on a black page" decoding="async" class="feat-shot">
+          <img data-shot="creekngreek" src="work/creekngreek.jpg" alt="Creek n Greek website — aerial view of the resort pool and lounge" decoding="async" class="feat-shot object-top">
+          <img data-shot="signalface" src="work/signalface.jpg" alt="Signal Face app — For You video feed with the creator sidebar" decoding="async" class="feat-shot object-left-top">
           <span id="feat-cap" class="cap-fade absolute inset-x-0 bottom-0 z-[2] px-4 py-3.5 text-[10px] tracking-[.16em] uppercase">01 — cod.sagexlimited.com</span>
         </div>
       </div>
@@ -1336,15 +1336,31 @@
   // The COD trailer plays only while it is the featured project and the panel is on screen.
   // With reduced motion it never autoplays; the poster frame stays instead.
   var video = document.querySelector('#feat video'), inView = false;
+  // It also waits for the product shots, so its 9.6 MB download can't starve them on a slow
+  // connection and leave the plate blank when another row is tapped.
+  var shotsReady = false;
   function syncVideo() {
     if (!video) return;
-    if (!reduce && inView && active === video.dataset.shot) {
+    if (!reduce && shotsReady && inView && active === video.dataset.shot) {
       var pl = video.play(); if (pl && pl.catch) pl.catch(function () {});
     } else if (!video.paused) video.pause();
   }
   if (video && 'IntersectionObserver' in window) {
     new IntersectionObserver(function (es) { inView = es[0].isIntersecting; syncVideo(); }, { threshold: .25 })
       .observe(document.querySelector('#feat .plate'));
+  }
+
+  var pending = shots.filter(function (s) { return s.tagName === 'IMG' && !s.complete; });
+  function shotsSettled() { shotsReady = true; syncVideo(); }
+  if (!pending.length) shotsSettled();
+  else {
+    var left = pending.length;
+    pending.forEach(function (img) {
+      function done() { if (--left === 0) shotsSettled(); }
+      img.addEventListener('load', done, { once: true });
+      img.addEventListener('error', done, { once: true });
+    });
+    setTimeout(shotsSettled, 15000); // Very slow connection: don't hold the trailer back forever.
   }
 
   function show(key) {
